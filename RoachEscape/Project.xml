@@ -13,6 +13,7 @@
 	
 	<!--------------------------------WINDOW SETTINGS------------------------------->
 	
+	<android target-sdk-version="23" />
 	<!--These window settings apply to all targets-->
 	<window width="1024" height="768" fps="60" background="#000000" hardware="true" vsync="true" />
 	

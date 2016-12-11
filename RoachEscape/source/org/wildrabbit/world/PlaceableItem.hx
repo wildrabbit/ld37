@@ -1,13 +1,16 @@
 package org.wildrabbit.world;
 
+import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.input.FlxPointer;
 import flixel.math.FlxPoint;
 import flixel.system.FlxAssets.FlxGraphicAsset;
+import flixel.system.FlxSound;
 import flixel.util.FlxColor;
 import flixel.util.FlxSpriteUtil.DrawStyle;
 import flixel.util.FlxSpriteUtil.LineStyle;
+import org.wildrabbit.roach.AssetPaths;
 import org.wildrabbit.roach.PlayState;
 import org.wildrabbit.roach.PlayState.StageMode;
 
@@ -22,9 +25,14 @@ class PlaceableItem extends FlxSprite implements Actor
 	public var parent:PlayState;
 	public var itemData:PlaceableItemData;
 	
+	var facingSound:FlxSound;
+	
 	public function new() 
 	{
 		super();
+		facingSound = new FlxSound();
+		facingSound.loadEmbedded(AssetPaths.changeDir__wav);
+		facingSound.stop();
 	}
 	
 	public function init(parent:PlayState, item:PlaceableItemData):Void
@@ -36,13 +44,25 @@ class PlaceableItem extends FlxSprite implements Actor
 	
 	private function initGfx():Void
 	{
-		if (itemData.type == "changeDir")
-		{
-			loadGraphic(itemData.spritePath, true, 64, 64, false );
-			animation.add("default", [itemData.spriteAnims[0]], 10, true);
-			animation.add("play", itemData.spriteAnims, 10, true);
-			animation.play("default");
-		}
+		loadGraphic(itemData.spritePath, true, 64, 64, false );
+		animation.add("default", [itemData.spriteAnims[0]], 10, true);
+		animation.add("play", itemData.spriteAnims, 10, true);
+		animation.play("default");
+
+		//if (itemData.type == "changeDir")
+		//{
+			//loadGraphic(itemData.spritePath, true, 64, 64, false );
+			//animation.add("default", [itemData.spriteAnims[0]], 10, true);
+			//animation.add("play", itemData.spriteAnims, 10, true);
+			//animation.play("default");
+		//}
+		//else if (itemData.type == "teleporter")
+		//{
+			//loadGraphic(itemData.spritePath, true, 64, 64, false );
+			//animation.add("default", [itemData.spriteAnims[0]], 10, true);
+			//animation.add("play", itemData.spriteAnims, 10, true);
+			//animation.play("default");			
+		//}
 	}
 	
 	/* INTERFACE org.wildrabbit.world.Actor */
@@ -61,6 +81,7 @@ class PlaceableItem extends FlxSprite implements Actor
 		animation.play("default");
 	}
 	
+
 	public function onEntityInteracted(a:Actor):Void
 	{
 		if (Std.is(a, Player))
@@ -80,6 +101,10 @@ class PlaceableItem extends FlxSprite implements Actor
 					case "right": { p.changeFacing(FlxObject.RIGHT); }
 					case "down": { p.changeFacing(FlxObject.DOWN); }
 					case "up": { p.changeFacing(FlxObject.UP); }	
+				}
+				if (!facingSound.playing)
+				{
+					facingSound.play();
 				}
 				//myCoords.put();
 				//midCoords.put();

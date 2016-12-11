@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset name="tileset_00" tilewidth="64" tileheight="64" tilecount="16" columns="4">
- <image source="../images/tileset_00.png" width="256" height="256"/>
+<tileset name="tileset_00" tilewidth="64" tileheight="64" tilecount="32" columns="8">
+ <image source="../images/tileset_00.png" width="512" height="256"/>
  <tile id="0">
   <properties>
    <property name="tileType" value="void"/>
@@ -21,34 +21,54 @@
    <property name="tileType" value="fullBlock"/>
   </properties>
  </tile>
- <tile id="4">
+ <tile id="8">
   <properties>
    <property name="edgeType" value="left"/>
   </properties>
  </tile>
- <tile id="5">
+ <tile id="9">
   <properties>
    <property name="edgeType" value="right"/>
   </properties>
  </tile>
- <tile id="6">
+ <tile id="10">
   <properties>
    <property name="edgeType" value="up"/>
   </properties>
  </tile>
- <tile id="7">
+ <tile id="11">
   <properties>
    <property name="edgeType" value="down"/>
   </properties>
  </tile>
- <tile id="8">
+ <tile id="16">
   <properties>
    <property name="tileType" value="gap"/>
   </properties>
  </tile>
- <tile id="9">
+ <tile id="17">
   <properties>
    <property name="tileType" value="gap"/>
+  </properties>
+ </tile>
+ <tile id="18">
+  <properties>
+   <property name="tileType" value="turnRight"/>
+  </properties>
+ </tile>
+ <tile id="19">
+  <properties>
+   <property name="tileType" value="turnRight"/>
+  </properties>
+ </tile>
+ <tile id="24">
+  <properties>
+   <property name="tileType" value="turnLeft"/>
+  </properties>
+ </tile>
+ <tile id="25">
+  <properties>
+   <property name="tileType" value="turnLeft"/>
   </properties>
  </tile>
 </tileset>

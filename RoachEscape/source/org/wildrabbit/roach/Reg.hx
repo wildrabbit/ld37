@@ -1,6 +1,7 @@
 package org.wildrabbit.roach;
 
 import flixel.util.FlxSave;
+import org.wildrabbit.roach.PlayState.PlaceableItemTool;
 
 /**
  * Handy, pre-built Registry class that can be used to store
@@ -13,7 +14,37 @@ class Reg
 	 * Generic levels Array that can be used for cross-state stuff.
 	 * Example usage: Storing the levels of a platformer.
 	 */
-	public static var levels:Array<Dynamic> = [];
+	public static var levels:Array<Dynamic> = [AssetPaths.level0__tmx, AssetPaths.level1__tmx, AssetPaths.level2__tmx, AssetPaths.level3__tmx];
+	
+	/**
+	 * Tools array with the loadouts per level
+	 * Example usage: Storing the levels of a platformer.
+	 */
+	public static var levelToolLoadouts:Array<Array<PlaceableItemTool>> = [
+		[
+			{id:0, amount:1 },
+			{id:1, amount:1 }
+		], 		
+		[
+			{id:0, amount:1 },
+			{id:1, amount:1 },
+			{id:2, amount:1 },
+			{id:3, amount:1 }
+		], 				
+		[
+			{id:0, amount:2 },
+			{id:1, amount:2 },
+			{id:2, amount:2 },
+			{id:3, amount:2 }
+		], 				
+		[
+			{id:0, amount:2 },
+			{id:1, amount:2 },
+			{id:2, amount:2 },
+			{id:3, amount:2 }
+		]
+	];
+	
 	/**
 	 * Generic level variable that can be used for cross-state stuff.
 	 * Example usage: Storing the current level number.

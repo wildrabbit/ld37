@@ -7,6 +7,7 @@ import flixel.math.FlxPoint;
 import flixel.math.FlxVector;
 import flixel.math.FlxVelocity;
 import flixel.system.FlxAssets.FlxGraphicAsset;
+import flixel.system.FlxSound;
 import flixel.util.FlxColor;
 import flixel.util.FlxSpriteUtil.DrawStyle;
 import flixel.util.FlxSpriteUtil.LineStyle;
@@ -27,6 +28,8 @@ class Player extends FlxSprite implements Actor
 	private var parent: PlayState;
 	
 	private var speed:Float;
+	
+			var wallSound:FlxSound;
 	// stuff
 	
 	public override function update(dt:Float):Void 
@@ -46,6 +49,10 @@ class Player extends FlxSprite implements Actor
 		var coordsBR:FlxPoint = null;
 		var coordsTR:FlxPoint = null;
 		var coordsBL:FlxPoint = null;
+		
+		wallSound = new FlxSound();
+		wallSound.loadEmbedded(AssetPaths.wall__wav);
+		wallSound.stop();		
 		
 		super.update(dt);
 
@@ -73,9 +80,10 @@ class Player extends FlxSprite implements Actor
 			else 
 			{
 				var goalCoords:FlxPoint = parent.levelData.getTilePositionFromWorld(Math.round(parent.goal.x), Math.round(parent.goal.y));
-				var midPointCoords:FlxPoint = parent.levelData.getTilePositionFromWorld(Math.round(x + width / 2), Math.round(y + height / 2));
+				var midPos:FlxPoint = getMidpoint();
+				var midPointCoords:FlxPoint = parent.levelData.getTilePositionFromWorld(Math.round(midPos.x), Math.round(midPos.y));
 				
-				if (goalCoords.equals(midPointCoords) && (coordsTL.equals(coordsBR)) && getPosition().distanceTo(parent.goal.getPosition()) < 10)
+				if (goalCoords.equals(midPointCoords) &&  midPos.distanceTo(parent.goal.getMidpoint()) < 5)
 				{
 					trace("yeah!");
 					parent.onReachedGoal();
@@ -85,10 +93,13 @@ class Player extends FlxSprite implements Actor
 					var item:PlaceableItem = parent.getItemAtPos(midPointCoords);
 					if (item != null)
 					{
-						if (coordsTL.equals(coordsBR))
+						var itemMid:FlxPoint = item.getMidpoint();
+						if (midPos.distanceTo(itemMid) < 5)
 						{					
 							item.onEntityInteracted(this);
 						}
+						itemMid.put();
+						midPos.put();
 					}
 					else 
 					{
@@ -128,6 +139,8 @@ class Player extends FlxSprite implements Actor
 						{
 							setPosition(oldPos.x,oldPos.y);
 							changeFacing(calculateNextFacing());
+							if (!wallSound.playing) { wallSound.play(); }
+							FlxG.camera.shake(0.0004, 0.1);
 						}	
 					}
 				}

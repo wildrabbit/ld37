@@ -5,12 +5,16 @@ import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.addons.editors.tiled.TiledTileLayer;
 import flixel.addons.editors.tiled.TiledTileSet;
+import flixel.addons.effects.FlxTrail;
 import flixel.addons.tile.FlxTilemapExt;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.input.FlxPointer;
 import flixel.math.FlxPoint;
+import flixel.system.FlxSound;
 import flixel.text.FlxText;
 import flixel.tile.FlxTilemap;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
 import flixel.ui.FlxButton;
 import flixel.addons.editors.tiled.TiledLayer.TiledLayerType;
 import flixel.util.FlxColor;
@@ -51,14 +55,19 @@ typedef PlaceableItemTool =
  */
 class PlayState extends FlxState
 {
-	private static inline var AWAKE_DELAY:Float = 1.5;
+	private static inline var AWAKE_DELAY:Float = 0.3;
 	public var levelData:LevelData;
 	
 	private var layerVec: Array<FlxTilemapExt>;
 	
+	// HACK to control the entities depths
 	private var bgLayers = new FlxTypedGroup<FlxTilemapExt>();
-	private var bgLayer:FlxTilemapExt;
 	private var mapLayers:FlxTypedGroup<FlxTilemapExt>;
+	public var placedItems: FlxTypedGroup<PlaceableItem>;
+	private var playerLayer: FlxTypedGroup<Player>;
+	private var goalLayer: FlxTypedGroup<Goal>;
+	
+	private var bgLayer:FlxTilemapExt;
 	
 	private var hud:HUD;
 	
@@ -71,16 +80,32 @@ class PlayState extends FlxState
 	private var selectedToolIdx:Int;
 	private var selectedPlaceable:PlaceableItem;
 	
+	private var back:FlxButton;
+	private var next:FlxButton;
+	private var toggleSpeed:FlxButton;
+	
+	private var stageTxt:FlxText;
+	private var toolTxt:FlxText;
+	private var lvTxt:FlxText;
+	
+	private var select:FlxSprite;
 
 	public var player:Player;
 	public var goal:Goal;
 	
 	public var actors: Array<Actor>;
-	public var placedItems: FlxTypedGroup<PlaceableItem>;
 	
-	public var thisLevelTools: Array<PlaceableItemTool>;
 	public var currentTools:Array<PlaceableItemTool>;
 	public var toolLibrary: Map<Int,PlaceableItemData>;
+	
+	private var goalSound:FlxSound;
+	private var toolClick:FlxSound;
+	private var playClick:FlxSound;
+	private var placeClick:FlxSound;
+	private var wrongPlaceClick:FlxSound;
+	
+	private var playerTrail:FlxTrail;
+	private var playerTrailLayer:FlxTypedGroup<FlxTrail>;
 	
 	/**
 	 * Function that is called up when to state is created to set it up.
@@ -88,6 +113,7 @@ class PlayState extends FlxState
 	override public function create():Void
 	{
 		super.create();
+		currentTools = new Array<PlaceableItemTool>();
 		
 		buildItemLibrary();
 		
@@ -107,26 +133,25 @@ class PlayState extends FlxState
 		placedItems = new FlxTypedGroup<PlaceableItem>();
 		add(placedItems);
 		
-		mapLayers = new FlxTypedGroup<FlxTilemapExt>();
-		add(mapLayers);
+		
+		goalLayer = new FlxTypedGroup<Goal>();
+		add(goalLayer);
+		
+		playerTrailLayer = new FlxTypedGroup<FlxTrail>();
+		add(playerTrailLayer);
+
+		playerLayer = new FlxTypedGroup<Player>();
+		add(playerLayer);
 		selectedToolIdx = -1;
 
+		mapLayers = new FlxTypedGroup<FlxTilemapExt>();
+		add(mapLayers);
+
 		
-		levelData = new LevelData("assets/data/level1.tmx");
+		levelData = new LevelData(Reg.levels[Reg.level]);
 		levelData.build(this);
 		
-		thisLevelTools = [
-			{id:0, amount:2 },
-			{id:1, amount:2 },
-			{id:2, amount:2 },
-			{id:3, amount:2 },
-		];
-		currentTools = [
-			{id:0, amount:2 },
-			{id:1, amount:2 },
-			{id:2, amount:2 },
-			{id:3, amount:2 }
-		];
+		resetToolLoadout();
 		
 		//thisLevelTools = [
 			//{id:0, amount:1 },
@@ -136,21 +161,59 @@ class PlayState extends FlxState
 			//{id:0, amount:1 },
 			//{id:1, amount:2 },
 		//];
+		
+		select = new FlxSprite(0, 0, AssetPaths.select__png);
+		
 		hud = new HUD(this);
 		hud.buildToolButtons(currentTools, toolLibrary);
-		
+		hud.onStageModeChanged(stageMode);
 		add(hud);
 		
 		title = new FlxText(850, 44, 0, "TOOLS", 24);
 		title.color.setRGB(130, 0, 37);
 		add(title);
+		
+		back = new FlxButton(5, 5, "prev", function():Void
+		{
+			Reg.level = (Reg.levels.length + Reg.level - 1) % Reg.levels.length;
+			FlxG.switchState(new PlayState());
+		});
+		
+		add(back);
+		
+		next = new FlxButton(80, 5, "next", function():Void 
+		{
+			Reg.level = (Reg.level + 1) % Reg.levels.length;
+			FlxG.switchState(new PlayState());
+		} );
+		add(next);
+		
+		stageTxt = new FlxText(5, 30, 0, "stage: " + stageMode, 14);
+		stageTxt.color = FlxColor.WHITE;
+		add(stageTxt);
+		
+		var toolIdx:Int = selectedToolIdx == -1 ? -1 : toolLibrary.get(currentTools[selectedToolIdx].id).templateID;
+		toolTxt = new FlxText(5, 50, 0, "tool: " + ((selectedToolIdx == -1) ? "none" : Std.string(toolIdx)), 14);
+		stageTxt.color = FlxColor.WHITE;
+		add(toolTxt);
+		
+		lvTxt = new FlxText(5, 70, 0, "Level  " + Reg.level + " - " + Reg.levels[Reg.level], 14);
+		lvTxt.color = FlxColor.WHITE;
+		add(lvTxt);
+		
+		goalSound = new FlxSound();
+		goalSound.loadEmbedded(AssetPaths.goal__wav);
+		goalSound.stop();
+		
 	}
 	
 	public function buildPlayer(playerData: PlayerData):Void
-	 {				
+	 {					
 		player = new Player();
 		player.init(this, playerData);
-		add(player);
+		playerLayer.add(player);
+		playerTrail = new FlxTrail(player);
+
 		
 		actors.push(player);
 	 }
@@ -160,10 +223,7 @@ class PlayState extends FlxState
 		goal = new Goal();
 		var pos:FlxPoint = levelData.getWorldPositionFromTileCoords(startCoords);
 		goal.setPosition(pos.x, pos.y);
-		add(goal);
-		
-		remove(player);
-		add(player);
+		goalLayer.add(goal);
 		
 		actors.push(goal);
 	 }
@@ -191,6 +251,15 @@ class PlayState extends FlxState
 	override public function destroy():Void
 	{
 		super.destroy();
+		actors = null;
+		layerVec = null;
+		player = null;
+		goal = null;
+		placedItems = null;
+		mapLayers = null;
+		bgLayer = null;
+		bgLayers = null;
+		hud = null;
 	}
 	
 	public function getItemAtPos(coords:FlxPoint): PlaceableItem
@@ -263,7 +332,7 @@ class PlayState extends FlxState
 							var templateID:Int = entityData.templateID;
 							for (i in 0...currentTools.length)
 							{
-								if (currentTools[i].id == templateID && currentTools[i].amount < thisLevelTools[i].amount)
+								if (currentTools[i].id == templateID && currentTools[i].amount < Reg.levelToolLoadouts[Reg.level][i].amount)
 								{
 									currentTools[i].amount++;
 									hud.updateTool(i, currentTools[i].amount);
@@ -315,12 +384,19 @@ class PlayState extends FlxState
 			timeToAwake -= dt;
 			if (timeToAwake <= 0)
 			{
+				playerTrail.resetTrail();
+				playerTrailLayer.add(playerTrail);
 				for (a in actors)
 				{
 					a.startPlaying();
 				}
 			}
 		}
+		
+		stageTxt.text = "stage: " + stageMode;
+		var toolIdx:Int = selectedToolIdx == -1 ? -1 : toolLibrary.get(currentTools[selectedToolIdx].id).templateID;
+		toolTxt.text = "tool: " + (selectedToolIdx == -1 ? "none" : Std.string(toolIdx));
+		
 	}
 	
 	public function toggleTool(i:Int):Void
@@ -334,14 +410,31 @@ class PlayState extends FlxState
 			{
 				selectedToolIdx = -1;
 				trace("Deselected tool");			
+				remove(select);
 			}
 			else 
 			{
 				selectedToolIdx = i;
 				trace("current tool: " + toolLibrary.get(currentTools[selectedToolIdx].id).templateID);			
+				add(select);
+				var pos:FlxPoint = hud.tools[i].getMidpoint();
+				pos.subtract(select.width / 2, select.height / 2);
+				select.setPosition(pos.x, pos.y);
+				FlxTween.tween(select.scale, { x:1.1, y:1.1}, 0.5, { type:FlxTween.PINGPONG } );
+				pos.put();
 			}
 			
 			
+		}
+		else 
+		{
+			for (child in this)
+			{
+				if (child == select)
+				{
+					remove(select);
+				}
+			}
 		}
 	}
 	
@@ -351,36 +444,29 @@ class PlayState extends FlxState
 		{
 			case StageMode.EDIT:
 			{
-				stageMode = StageMode.PLAY;
-				timeToAwake = AWAKE_DELAY;
-				selectedToolIdx = -1;
-				selectedPlaceable = null;
+				setStageMode(StageMode.PLAY);
 			}
 			case StageMode.PAUSE: 
 			{ 
-				stageMode  = StageMode.PLAY; 
-				for (a in actors)
-				{
-					a.pause(false);
-				}
+				setStageMode(StageMode.PLAY);
 			}
 			case StageMode.PLAY: 
 			{ 
-				stageMode = StageMode.PAUSE; 
-				for (a in actors)
-				{
-					a.pause(true);
-				}
+				setStageMode(StageMode.PAUSE);
 			}	
 			case StageMode.OVER: 
 			{ 
-				stageMode = StageMode.EDIT; 
-				timeToAwake = -1;
-				for (a in actors)
-				{
-					a.resetToDefaults();
-				}
+				setStageMode(StageMode.EDIT);
 			}	
+		}
+	}
+	private function resetToolLoadout():Void
+	{		
+		currentTools.splice(0, currentTools.length);
+		var levelLoadout:Array<PlaceableItemTool> = Reg.levelToolLoadouts[Reg.level];
+		for (i in 0...levelLoadout.length)
+		{					
+			currentTools.push( { id: levelLoadout[i].id, amount:levelLoadout[i].amount } );
 		}
 	}
 	private function resetTools():Void
@@ -393,56 +479,20 @@ class PlayState extends FlxState
 		placedItems.clear();
 		selectedToolIdx = -1;
 		selectedPlaceable = null;
-		currentTools.splice(0, currentTools.length);
-		for (i in 0...thisLevelTools.length)
-		{					
-			currentTools.push( { id: thisLevelTools[i].id, amount:thisLevelTools[i].amount } );
+		resetToolLoadout();
+		for (i in 0...currentTools.length)
+		{
 			hud.updateTool(i, currentTools[i].amount);
 		}
-
 	}
 	public function resetPressed(): Void 
 	{
-		switch(stageMode)
+		if (stageMode == StageMode.EDIT)
 		{
-			case StageMode.EDIT:
-			{
-				// Clear placed items
-				resetTools();
-			}
-			case StageMode.PAUSE:
-			{
-				stageMode = StageMode.EDIT;
-				// Clear everything
-				for (a in actors)
-				{
-					a.resetToDefaults();
-				}
-				resetTools();
-			}
-			case StageMode.PLAY:
-			{
-				stageMode = StageMode.EDIT;
-				// Clear everything
-				for (a in actors)
-				{
-					a.resetToDefaults();
-				}
-				resetTools();
-			}
-			case StageMode.OVER:
-			{
-				// Clear placed items
-				// TO MENU?
-				stageMode = StageMode.EDIT;
-				// Clear everything
-				for (a in actors)
-				{
-					a.resetToDefaults();
-				}
-				resetTools();
-			}
-		}	
+			resetTools();
+		}
+		setStageMode(StageMode.EDIT);
+		// TODO: On Over we should probably do something different
 	}
 	
 	public function isPlaying():Bool
@@ -480,24 +530,105 @@ class PlayState extends FlxState
 	
 	public function onReachedGoal():Void
 	{
-		stageMode = StageMode.OVER;
 		result = Result.WON;
-		for (a in actors)
+		setStageMode(StageMode.OVER);
+		
+		if (!goalSound.playing)
 		{
-			a.pause(true);		
+			goalSound.play();
 		}
 		trace("YOU WON!");
 	}
 	
 	public function onFellDown():Void
 	{
-		stageMode = StageMode.OVER;
 		result = Result.DIED;
 		player.visible = false;
-		for (a in actors)
-		{
-			a.pause(true);		
-		}
-		trace("YOU WON!");
+		
+		setStageMode(StageMode.OVER);
 	}
+	
+	public function setStageMode(newMode:StageMode)
+	{
+		switch(newMode)
+		{
+			case StageMode.EDIT:
+			{
+				playerTrailLayer.remove(playerTrail);
+				// Clear everything
+				for (a in actors)
+				{
+					a.resetToDefaults();
+				}
+			}
+			case StageMode.PLAY:
+			{
+				if (stageMode == EDIT)
+				{
+					timeToAwake = AWAKE_DELAY;
+					selectedToolIdx = -1;
+					selectedPlaceable = null;					
+				}
+				else if (stageMode == PAUSE)
+				{
+					for (a in actors)
+					{
+						a.pause(false);
+
+					}
+				playerTrail.resetTrail();
+				playerTrailLayer.add(playerTrail);
+				}
+			}
+			case StageMode.PAUSE:
+			{
+				for (a in actors)
+				{
+					a.pause(true);
+				}
+				playerTrailLayer.remove(playerTrail);
+			}
+			case StageMode.OVER:
+			{
+				playerTrailLayer.remove(playerTrail);
+				for (a in actors)
+				{
+					a.pause(true);		
+				}
+					
+				if (result == Result.WON)
+				{
+					var youWon:FlxText = new FlxText((bgLayer.x + bgLayer.width) / 2, (bgLayer.y + bgLayer.height) / 2, 0, "WELL DONE!", 72);
+					youWon.alignment = FlxTextAlign.CENTER;
+					youWon.x -= youWon.width / 2;
+					youWon.y -= youWon.height /2;
+					add(youWon);
+					youWon.scale.set(0.25, 0.25);
+					var t:FlxTween = FlxTween.tween(youWon.scale, { "x": 1.25, "y":1.25 }, 0.35, { type:FlxTween.ONESHOT, ease:FlxEase.backOut, onComplete:onNextLevel } );
+				}
+			}
+		}
+		stageMode = newMode;
+		hud.onStageModeChanged(stageMode);
+	}
+	
+	public function onNextLevel(t:FlxTween):Void
+	{
+		if (Reg.level >= Reg.levels.length - 1)
+		{
+			// NO MOAR. Restart or back to menu
+			Reg.level = 0;
+		}
+		else 
+		{
+			Reg.level++;
+		}
+		FlxTween.num(0, 100, 1, { onComplete: function(t:FlxTween):Void { FlxG.switchState(new PlayState()); }} );
+	}
+	
+	public function loadLevel(levelID:String):Void
+	{
+		
+	}
+	
 }
