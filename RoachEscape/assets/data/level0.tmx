@@ -60,7 +60,7 @@
    </properties>
    <ellipse/>
   </object>
-  <object id="14" name="Goal" type="Goal" x="352" y="400">
+  <object id="14" name="Goal" type="Goal" x="416" y="400">
    <properties>
     <property name="type" value="goal"/>
    </properties>

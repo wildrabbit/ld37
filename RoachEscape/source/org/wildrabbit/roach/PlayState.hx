@@ -8,7 +8,6 @@ import flixel.addons.editors.tiled.TiledTileSet;
 import flixel.addons.tile.FlxTilemapExt;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.input.FlxPointer;
-import flixel.input.mouse.FlxMouseEventManager;
 import flixel.math.FlxPoint;
 import flixel.text.FlxText;
 import flixel.tile.FlxTilemap;
@@ -16,6 +15,7 @@ import flixel.ui.FlxButton;
 import flixel.addons.editors.tiled.TiledLayer.TiledLayerType;
 import flixel.util.FlxColor;
 import haxe.ds.Vector;
+import openfl.Assets;
 import org.wildrabbit.ui.HUD;
 import org.wildrabbit.world.Actor;
 import org.wildrabbit.world.Goal;
@@ -78,10 +78,9 @@ class PlayState extends FlxState
 	public var actors: Array<Actor>;
 	public var placedItems: FlxTypedGroup<PlaceableItem>;
 	
-	public var currentTools: Array<PlaceableItemTool>;
+	public var thisLevelTools: Array<PlaceableItemTool>;
+	public var currentTools:Array<PlaceableItemTool>;
 	public var toolLibrary: Map<Int,PlaceableItemData>;
-	
-	private var mouseMgr: FlxMouseEventManager;
 	
 	/**
 	 * Function that is called up when to state is created to set it up.
@@ -89,8 +88,6 @@ class PlayState extends FlxState
 	override public function create():Void
 	{
 		super.create();
-		
-		FlxG.plugins.add(new FlxMouseEventManager());
 		
 		buildItemLibrary();
 		
@@ -115,13 +112,30 @@ class PlayState extends FlxState
 		selectedToolIdx = -1;
 
 		
-		levelData = new LevelData("assets/data/level0.tmx");
-		levelData.build(this);	
+		levelData = new LevelData("assets/data/level1.tmx");
+		levelData.build(this);
 		
-		currentTools = [
-			{id:0, amount:1 },
+		thisLevelTools = [
+			{id:0, amount:2 },
 			{id:1, amount:2 },
+			{id:2, amount:2 },
+			{id:3, amount:2 },
 		];
+		currentTools = [
+			{id:0, amount:2 },
+			{id:1, amount:2 },
+			{id:2, amount:2 },
+			{id:3, amount:2 }
+		];
+		
+		//thisLevelTools = [
+			//{id:0, amount:1 },
+			//{id:1, amount:2 },
+		//];
+		//currentTools = [
+			//{id:0, amount:1 },
+			//{id:1, amount:2 },
+		//];
 		hud = new HUD(this);
 		hud.buildToolButtons(currentTools, toolLibrary);
 		
@@ -130,11 +144,6 @@ class PlayState extends FlxState
 		title = new FlxText(850, 44, 0, "TOOLS", 24);
 		title.color.setRGB(130, 0, 37);
 		add(title);
-	}
-	
-	public function click(layer:FlxTilemapExt):Void
-	{
-		trace(layer);
 	}
 	
 	public function buildPlayer(playerData: PlayerData):Void
@@ -183,6 +192,33 @@ class PlayState extends FlxState
 	{
 		super.destroy();
 	}
+	
+	public function getItemAtPos(coords:FlxPoint): PlaceableItem
+	{
+		var pos:FlxPoint = FlxPoint.get();
+		var newPos:FlxPoint = FlxPoint.get();
+		var ret:PlaceableItem = null;
+		for (item in placedItems)
+		{
+			item.getPosition(pos);
+			pos.x += item.width/2;
+			pos.y += item.height/2;
+			
+			newPos = levelData.getTilePositionFromWorld(Math.round(pos.x), Math.round(pos.y));
+			var x1:Int = Std.int(coords.x);
+			var y1:Int = Std.int(coords.y);
+			var x2:Int = Std.int(newPos.x);
+			var y2:Int = Std.int(newPos.y);
+			if (x1 == x2 && y1 == y2)
+			{
+				ret = item;
+				break;
+			}
+			newPos.put();
+		}
+		pos.put();
+		return ret;
+	}
 
 	/**
 	 * Function that is called once every frame.
@@ -191,14 +227,85 @@ class PlayState extends FlxState
 	{
 		super.update(dt);
 		
+		var pos:FlxPoint = FlxG.mouse.getWorldPosition();			
+		FlxG.log.add(stageMode);
+		FlxG.log.add("mouse: " + pos.x + "," + pos.y);
+		var fits:Bool = pos.x >= bgLayer.x && pos.x < bgLayer.x + bgLayer.width && pos.y >= bgLayer.y && pos.y < bgLayer.y + bgLayer.height;
+		var mouseReleased:Bool = FlxG.mouse.justReleased;
+		FlxG.log.add("pos Inside" + fits);
+		FlxG.log.add("released? " + mouseReleased);
 		if (stageMode == StageMode.EDIT)
 		{
-			var pos:FlxPoint = FlxG.mouse.getWorldPosition();
-			if (FlxG.mouse.justReleased && pos.x >= bgLayer.x && pos.x < bgLayer.x + bgLayer.width && pos.y >= bgLayer.y && pos.y < bgLayer.y + bgLayer.height)
+			if (fits && mouseReleased)
 			{
+				var coords:FlxPoint = null;
 				pos.subtract(bgLayer.x, bgLayer.y);
-				pos = levelData.getTilePositionFromWorld(Math.round(pos.x), Math.round(pos.y));
-				trace("click!");
+				coords = levelData.getTilePositionFromWorld(Math.round(pos.x), Math.round(pos.y));
+				trace("click! (" + coords.x + "," + coords.y + ")");
+				
+				var tile:TileData = levelData.getTileAt(coords);
+				if (tile.type != TileType.EMPTY)
+				{
+					var entity:PlaceableItem = getItemAtPos(coords);
+					if (entity != null)
+					{
+						var selectedToolData:PlaceableItemData = selectedToolIdx >= 0 ? toolLibrary.get(currentTools[selectedToolIdx].id) : null;
+						var entityData:PlaceableItemData = entity.itemData;
+						
+						var existsOther:Bool = selectedToolIdx >= 0 
+							&& currentTools[selectedToolIdx].id != entityData.templateID 
+							&& currentTools[selectedToolIdx].amount > 0;
+						var willReplace:Bool = existsOther && tile.type == selectedToolData.allowedTileType;
+						var removeScheduled:Bool = !existsOther || (existsOther && tile.type == selectedToolData.allowedTileType);
+						
+						if (removeScheduled)
+						{
+							var templateID:Int = entityData.templateID;
+							for (i in 0...currentTools.length)
+							{
+								if (currentTools[i].id == templateID && currentTools[i].amount < thisLevelTools[i].amount)
+								{
+									currentTools[i].amount++;
+									hud.updateTool(i, currentTools[i].amount);
+								}
+							}
+							trace ("Entity #" + entity.itemData.templateID);
+							placedItems.remove(entity);
+							actors.remove(entity);
+							entity.destroy();							
+						}
+						
+						if (willReplace)
+						{
+							var item:PlaceableItem = new PlaceableItem();
+							item.init(this, selectedToolData);
+							var newCoords:FlxPoint = levelData.getWorldPositionFromTileCoords(coords);
+							item.setPosition(newCoords.x, newCoords.y);
+							newCoords.put();
+							currentTools[selectedToolIdx].amount--;
+							hud.updateTool(selectedToolIdx, currentTools[selectedToolIdx].amount);
+							placedItems.add(item);
+							actors.push(item);
+						}
+
+					}
+					else {
+						trace ("No entity!");
+						if (selectedToolIdx >= 0 && currentTools[selectedToolIdx].amount > 0)
+						{
+							var item:PlaceableItem = new PlaceableItem();
+							item.init(this, toolLibrary.get(currentTools[selectedToolIdx].id));
+							var newCoords:FlxPoint = levelData.getWorldPositionFromTileCoords(coords);
+							item.setPosition(newCoords.x, newCoords.y);
+							newCoords.put();							
+							currentTools[selectedToolIdx].amount--;
+							hud.updateTool(selectedToolIdx, currentTools[selectedToolIdx].amount);							
+							placedItems.add(item);
+							actors.push(item);
+						}
+					}
+				}
+				coords.put();
 			}
 			pos.put();
 		}
@@ -220,14 +327,21 @@ class PlayState extends FlxState
 	{
 		if (stageMode == StageMode.EDIT)
 		{
-			if (selectedToolIdx == i)
+			var tool:PlaceableItemTool = currentTools[i];
+			if (i >= currentTools.length) return;
+			
+			if (selectedToolIdx == i || tool.amount == 0)
 			{
 				selectedToolIdx = -1;
+				trace("Deselected tool");			
 			}
 			else 
 			{
 				selectedToolIdx = i;
+				trace("current tool: " + toolLibrary.get(currentTools[selectedToolIdx].id).templateID);			
 			}
+			
+			
 		}
 	}
 	
@@ -239,6 +353,8 @@ class PlayState extends FlxState
 			{
 				stageMode = StageMode.PLAY;
 				timeToAwake = AWAKE_DELAY;
+				selectedToolIdx = -1;
+				selectedPlaceable = null;
 			}
 			case StageMode.PAUSE: 
 			{ 
@@ -259,6 +375,7 @@ class PlayState extends FlxState
 			case StageMode.OVER: 
 			{ 
 				stageMode = StageMode.EDIT; 
+				timeToAwake = -1;
 				for (a in actors)
 				{
 					a.resetToDefaults();
@@ -266,7 +383,24 @@ class PlayState extends FlxState
 			}	
 		}
 	}
-	
+	private function resetTools():Void
+	{
+		for (i in placedItems)
+		{
+			actors.remove(i);
+		}
+		placedItems.forEach(function(x:PlaceableItem):Void { x.destroy(); } );
+		placedItems.clear();
+		selectedToolIdx = -1;
+		selectedPlaceable = null;
+		currentTools.splice(0, currentTools.length);
+		for (i in 0...thisLevelTools.length)
+		{					
+			currentTools.push( { id: thisLevelTools[i].id, amount:thisLevelTools[i].amount } );
+			hud.updateTool(i, currentTools[i].amount);
+		}
+
+	}
 	public function resetPressed(): Void 
 	{
 		switch(stageMode)
@@ -274,6 +408,7 @@ class PlayState extends FlxState
 			case StageMode.EDIT:
 			{
 				// Clear placed items
+				resetTools();
 			}
 			case StageMode.PAUSE:
 			{
@@ -283,6 +418,7 @@ class PlayState extends FlxState
 				{
 					a.resetToDefaults();
 				}
+				resetTools();
 			}
 			case StageMode.PLAY:
 			{
@@ -292,12 +428,19 @@ class PlayState extends FlxState
 				{
 					a.resetToDefaults();
 				}
-				
+				resetTools();
 			}
 			case StageMode.OVER:
 			{
 				// Clear placed items
 				// TO MENU?
+				stageMode = StageMode.EDIT;
+				// Clear everything
+				for (a in actors)
+				{
+					a.resetToDefaults();
+				}
+				resetTools();
 			}
 		}	
 	}
@@ -315,6 +458,11 @@ class PlayState extends FlxState
 		var subtypes:Array<String> = ["left", "right", "up", "down"];
 		var btnNames:Array<String> = ["DIR-L", "DIR-R", "DIR-U", "DIR-D"];
 		var linkedEntities:Array<String> = ["", "", "", ""];
+		var allowedTypes:Array<TileType> = [TileType.GROUND, TileType.GROUND, TileType.GROUND, TileType.GROUND];
+		
+		var spritePath:String = "assets/images/entities_00.png";
+		var spriteAnims:Array<Array<Int>> = [[10,11], [6,7], [8,9], [12,13]];
+		
 		for (i in 0...4)
 		{
 			var placeable:PlaceableItemData = new PlaceableItemData();
@@ -323,6 +471,9 @@ class PlayState extends FlxState
 			placeable.subtype = subtypes[i];
 			placeable.linkedEntityType = linkedEntities[i];
 			placeable.btnName = btnNames[i];
+			placeable.spritePath = spritePath;
+			placeable.spriteAnims = spriteAnims[i];
+			placeable.allowedTileType = allowedTypes[i];
 			toolLibrary[i] = placeable;
 		}
 	}
@@ -331,6 +482,18 @@ class PlayState extends FlxState
 	{
 		stageMode = StageMode.OVER;
 		result = Result.WON;
+		for (a in actors)
+		{
+			a.pause(true);		
+		}
+		trace("YOU WON!");
+	}
+	
+	public function onFellDown():Void
+	{
+		stageMode = StageMode.OVER;
+		result = Result.DIED;
+		player.visible = false;
 		for (a in actors)
 		{
 			a.pause(true);		

@@ -76,10 +76,10 @@ class HUD extends FlxTypedSpriteGroup<FlxSprite>
 		var numberAvailable: Int = btnInfo.length;
 		for (i in 0...numberAvailable)
 		{
-			var s:String = library.get(btnInfo[i].id).btnName;			
-			var gfx:FlxGraphicAsset = null;
+			var placeableItemData:PlaceableItemData = library.get(btnInfo[i].id);
+			var s:String = placeableItemData.btnName;			
 			var amount:Int = btnInfo[i].amount;
-			tools[i].setToolData(gfx, s, amount);
+			tools[i].setToolData(placeableItemData.spritePath, placeableItemData.spriteAnims, s, amount);
 			if (!tools[i].baseButton.active)
 			{
 				tools[i].baseButton.active = true;
@@ -93,6 +93,14 @@ class HUD extends FlxTypedSpriteGroup<FlxSprite>
 				tools[i].resetGraphic(72, 96, FlxColor.fromString("#af980b"));
 				tools[i].baseButton.active = false;
 			}
+		}
+	}
+	
+	public function updateTool(i:Int, newAmount:Int):Void
+	{
+		if (tools[i] != null)
+		{
+			tools[i].txt.text = Std.string(newAmount);			
 		}
 	}
 }

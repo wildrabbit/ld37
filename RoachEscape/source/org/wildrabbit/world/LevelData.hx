@@ -31,7 +31,8 @@ enum TileType
 {
 	EMPTY;
 	GROUND;
-	WALL;		
+	WALL;
+	GAP;
 }
 
 
@@ -288,7 +289,8 @@ class LevelData extends TiledMap
 		switch(value)
 		{
 			case "void": { type = TileType.EMPTY;  }
-			case "ground":{ type = TileType.GROUND; }
+			case "ground": { type = TileType.GROUND; }
+			case "gap":{ type = TileType.GAP; }
 			case "fullBlock": {
 				type = TileType.WALL; 
 				tiles[idx].edgeMask = MASK_DOWN | MASK_LEFT | MASK_RIGHT | MASK_UP;
@@ -318,9 +320,9 @@ class LevelData extends TiledMap
 		return coords.x >= 0 && coords.x < width && coords.y >= 0 && coords.y < height;
 	}
 	
-	public function getTileAt(coords:FlxPoint):TileType
+	public function getTileAt(coords:FlxPoint):TileData
 	{
-		return tiles[asIndex(coords)].type;
+		return tiles[asIndex(coords)];
 	}
 	public function hitsEdgeAt(oldCoords:FlxPoint, coords:FlxPoint):Bool
 	{

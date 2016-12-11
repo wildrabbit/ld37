@@ -41,4 +41,14 @@
    <property name="edgeType" value="down"/>
   </properties>
  </tile>
+ <tile id="8">
+  <properties>
+   <property name="tileType" value="gap"/>
+  </properties>
+ </tile>
+ <tile id="9">
+  <properties>
+   <property name="tileType" value="gap"/>
+  </properties>
+ </tile>
 </tileset>

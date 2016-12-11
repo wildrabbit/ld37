@@ -1,4 +1,5 @@
 package org.wildrabbit.world;
+import org.wildrabbit.world.LevelData.TileType;
 
 /**
  * ...
@@ -11,9 +12,11 @@ class PlaceableItemData
 	public var subtype:String;
 	public var linkedEntityType:String;
 	public var btnName:String;
+	public var allowedTileType:TileType;
+	public var spritePath:String;
+	public var spriteAnims:Array<Int> = null;
 	
 	public function new() 
 	{
-		
 	}	
 }

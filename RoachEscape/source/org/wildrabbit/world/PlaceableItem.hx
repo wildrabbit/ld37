@@ -2,6 +2,8 @@ package org.wildrabbit.world;
 
 import flixel.FlxObject;
 import flixel.FlxSprite;
+import flixel.input.FlxPointer;
+import flixel.math.FlxPoint;
 import flixel.system.FlxAssets.FlxGraphicAsset;
 import flixel.util.FlxColor;
 import flixel.util.FlxSpriteUtil.DrawStyle;
@@ -17,8 +19,8 @@ using flixel.util.FlxSpriteUtil;
  */
 class PlaceableItem extends FlxSprite implements Actor
 {
-	var parent:PlayState;
-	var itemData:PlaceableItemData;
+	public var parent:PlayState;
+	public var itemData:PlaceableItemData;
 	
 	public function new() 
 	{
@@ -36,22 +38,10 @@ class PlaceableItem extends FlxSprite implements Actor
 	{
 		if (itemData.type == "changeDir")
 		{
-			makeGraphic(54, 54, FlxColor.TRANSPARENT);
-			var col: FlxColor = FlxColor.WHITE;
-			switch(itemData.subtype)
-			{
-				case "left": 
-				{ 
-					col = FlxColor.GREEN;				
-				}
-				case "right": { col = FlxColor.PINK; }
-				case "down": { col = FlxColor.BLUE; }
-				case "up": { col = FlxColor.YELLOW; }	
-			}
-			var lStyle: LineStyle = { color: FlxColor.BLACK, thickness: 4 };
-			var dStyle: DrawStyle = { smoothing: true };
-			
-			FlxSpriteUtil.drawRoundRect(this, 7, 7, 50, 50, 30, 10, col, lStyle, dStyle);
+			loadGraphic(itemData.spritePath, true, 64, 64, false );
+			animation.add("default", [itemData.spriteAnims[0]], 10, true);
+			animation.add("play", itemData.spriteAnims, 10, true);
+			animation.play("default");
 		}
 	}
 	
@@ -59,14 +49,16 @@ class PlaceableItem extends FlxSprite implements Actor
 	
 	public function startPlaying():Void 
 	{
-		
+		animation.play("play");
 	}
 	
 	public function pause(value:Bool):Void 
-	{}
+	{
+		animation.play(value ? "default" : "play");
+	}
 	public function resetToDefaults():Void 
 	{
-		
+		animation.play("default");
 	}
 	
 	public function onEntityInteracted(a:Actor):Void
@@ -76,6 +68,9 @@ class PlaceableItem extends FlxSprite implements Actor
 			var p:Player = cast a;
 			if (itemData.type == "changeDir")
 			{
+				//var myCoords:FlxPoint = parent.levelData.getTilePositionFromWorld(Math.round(x), Math.round(y));
+				//var midCoords:FlxPoint = parent.levelData.getWorldPositionFromTileCoords(myCoords);
+				//p.setPosition(midCoords.x, midCoords.y);
 				switch(itemData.subtype)
 				{
 					case "left": 
@@ -86,6 +81,8 @@ class PlaceableItem extends FlxSprite implements Actor
 					case "down": { p.changeFacing(FlxObject.DOWN); }
 					case "up": { p.changeFacing(FlxObject.UP); }	
 				}
+				//myCoords.put();
+				//midCoords.put();
 			}
 		}
 	}
