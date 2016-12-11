@@ -65,16 +65,29 @@ class Player extends FlxSprite implements Actor
 			}
 			else 
 			{
-				var wallHitTL = parent.levelData.getTileAt(coordsTL) == TileType.EMPTY || parent.levelData.getTileAt(coordsTL) == TileType.WALL || parent.levelData.hitsEdgeAt(oldCoords, coordsTL);
-				var wallHitTR = parent.levelData.getTileAt(coordsTR) == TileType.EMPTY ||parent.levelData.getTileAt(coordsTR) == TileType.WALL || parent.levelData.hitsEdgeAt(oldCoords, coordsTR);
-				var wallHitBL = parent.levelData.getTileAt(coordsBL) == TileType.EMPTY ||parent.levelData.getTileAt(coordsBL) == TileType.WALL || parent.levelData.hitsEdgeAt(oldCoords, coordsBL);
-				var wallHitBR = parent.levelData.getTileAt(coordsBR) == TileType.EMPTY || parent.levelData.hitsEdgeAt(oldCoords, coordsBR);
-				if (wallHitTL || wallHitTR || wallHitBL || wallHitBR)
+				var goalCoords:FlxPoint = parent.levelData.getTilePositionFromWorld(Math.round(parent.goal.x), Math.round(parent.goal.y));
+				var midPointCoords:FlxPoint = parent.levelData.getTilePositionFromWorld(Math.round(x + width / 2), Math.round(y + height / 2));
+				
+				if (goalCoords.equals(midPointCoords) && getPosition().distanceTo(parent.goal.getPosition()) < 10)
 				{
-					var pos:FlxPoint = parent.levelData.getWorldPositionFromTileCoords(oldCoords);
-					setPosition(pos.x,pos.y);
-					changeFacing(calculateNextFacing());
+					trace("yeah!");
+					parent.onReachedGoal();
 				}
+				else {
+					var wallHitTL = parent.levelData.getTileAt(coordsTL) == TileType.EMPTY || parent.levelData.getTileAt(coordsTL) == TileType.WALL || parent.levelData.hitsEdgeAt(oldCoords, coordsTL);
+					var wallHitTR = parent.levelData.getTileAt(coordsTR) == TileType.EMPTY ||parent.levelData.getTileAt(coordsTR) == TileType.WALL || parent.levelData.hitsEdgeAt(oldCoords, coordsTR);
+					var wallHitBL = parent.levelData.getTileAt(coordsBL) == TileType.EMPTY ||parent.levelData.getTileAt(coordsBL) == TileType.WALL || parent.levelData.hitsEdgeAt(oldCoords, coordsBL);
+					var wallHitBR = parent.levelData.getTileAt(coordsBR) == TileType.EMPTY || parent.levelData.hitsEdgeAt(oldCoords, coordsBR);
+					if (wallHitTL || wallHitTR || wallHitBL || wallHitBR)
+					{
+						var pos:FlxPoint = parent.levelData.getWorldPositionFromTileCoords(oldCoords);
+						setPosition(pos.x,pos.y);
+						changeFacing(calculateNextFacing());
+					}	
+				}
+				
+				goalCoords.put();
+				midPointCoords.put();
 			}
 		}
 		oldPos.put();

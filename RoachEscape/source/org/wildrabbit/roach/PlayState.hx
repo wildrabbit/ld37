@@ -30,6 +30,14 @@ enum StageMode
 	EDIT;
 	PLAY;
 	PAUSE;
+	OVER;
+}
+
+enum Result
+{
+	WON;
+	DIED;
+	TIMEDOUT;
 }
 
 typedef PlaceableItemTool =
@@ -58,6 +66,10 @@ class PlayState extends FlxState
 	
 	private var stageMode:StageMode;
 	private var timeToAwake:Float;
+	private var result:Result;
+	
+	private var selectedToolIdx:Int;
+	private var selectedPlaceable:PlaceableItem;
 	
 
 	public var player:Player;
@@ -100,6 +112,7 @@ class PlayState extends FlxState
 		
 		mapLayers = new FlxTypedGroup<FlxTilemapExt>();
 		add(mapLayers);
+		selectedToolIdx = -1;
 
 		
 		levelData = new LevelData("assets/data/level0.tmx");
@@ -140,6 +153,9 @@ class PlayState extends FlxState
 		goal.setPosition(pos.x, pos.y);
 		add(goal);
 		
+		remove(player);
+		add(player);
+		
 		actors.push(goal);
 	 }
 	
@@ -154,7 +170,7 @@ class PlayState extends FlxState
 		if (bgLayer != null)
 			bgLayers.remove(bgLayer);
 		bgLayer = layer;
-		FlxMouseEventManager.add(bgLayer, click, null, null, null, false, true);
+		//FlxMouseEventManager.add(bgLayer, click, null, null, null, false, true);
 		layerVec.push(layer);
 		bgLayers.add(bgLayer);
 	}
@@ -175,6 +191,18 @@ class PlayState extends FlxState
 	{
 		super.update(dt);
 		
+		if (stageMode == StageMode.EDIT)
+		{
+			var pos:FlxPoint = FlxG.mouse.getWorldPosition();
+			if (FlxG.mouse.justReleased && pos.x >= bgLayer.x && pos.x < bgLayer.x + bgLayer.width && pos.y >= bgLayer.y && pos.y < bgLayer.y + bgLayer.height)
+			{
+				pos.subtract(bgLayer.x, bgLayer.y);
+				pos = levelData.getTilePositionFromWorld(Math.round(pos.x), Math.round(pos.y));
+				trace("click!");
+			}
+			pos.put();
+		}
+		
 		if (timeToAwake >= 0)
 		{
 			timeToAwake -= dt;
@@ -192,6 +220,14 @@ class PlayState extends FlxState
 	{
 		if (stageMode == StageMode.EDIT)
 		{
+			if (selectedToolIdx == i)
+			{
+				selectedToolIdx = -1;
+			}
+			else 
+			{
+				selectedToolIdx = i;
+			}
 		}
 	}
 	
@@ -219,7 +255,15 @@ class PlayState extends FlxState
 				{
 					a.pause(true);
 				}
-			}			
+			}	
+			case StageMode.OVER: 
+			{ 
+				stageMode = StageMode.EDIT; 
+				for (a in actors)
+				{
+					a.resetToDefaults();
+				}
+			}	
 		}
 	}
 	
@@ -250,6 +294,11 @@ class PlayState extends FlxState
 				}
 				
 			}
+			case StageMode.OVER:
+			{
+				// Clear placed items
+				// TO MENU?
+			}
 		}	
 	}
 	
@@ -276,5 +325,16 @@ class PlayState extends FlxState
 			placeable.btnName = btnNames[i];
 			toolLibrary[i] = placeable;
 		}
+	}
+	
+	public function onReachedGoal():Void
+	{
+		stageMode = StageMode.OVER;
+		result = Result.WON;
+		for (a in actors)
+		{
+			a.pause(true);		
+		}
+		trace("YOU WON!");
 	}
 }
