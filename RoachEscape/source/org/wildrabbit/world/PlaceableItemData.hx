@@ -15,6 +15,7 @@ class PlaceableItemData
 	public var allowedTileType:TileType;
 	public var spritePath:String;
 	public var spriteAnims:Array<Int> = null;
+	public var name:String = null;
 	
 	public function new() 
 	{

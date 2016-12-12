@@ -38,7 +38,7 @@ class HUD extends FlxTypedSpriteGroup<FlxSprite>
 	var buttonSize:Int = 20;
 		
 		
-	private static inline var MAX_BUTTONS:Int = 8;
+	private static inline var MAX_BUTTONS:Int = 4;
 	
 	public function new(parent:PlayState) 
 	{
@@ -91,7 +91,7 @@ class HUD extends FlxTypedSpriteGroup<FlxSprite>
 			case StageMode.OVER:
 			{
 				playButton.text = "EDIT";
-				resetButton.text = "EXIT";
+				resetButton.text = "MENU";
 				for (i in 0...tools.length)
 				{
 					tools[i].baseButton.active = false;

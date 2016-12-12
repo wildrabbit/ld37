@@ -179,25 +179,25 @@ class PlayState extends FlxState
 			FlxG.switchState(new PlayState());
 		});
 		
-		add(back);
+		//add(back);
 		
 		next = new FlxButton(80, 5, "next", function():Void 
 		{
 			Reg.level = (Reg.level + 1) % Reg.levels.length;
 			FlxG.switchState(new PlayState());
 		} );
-		add(next);
+		//add(next);
 		
 		stageTxt = new FlxText(5, 30, 0, "stage: " + stageMode, 14);
 		stageTxt.color = FlxColor.WHITE;
-		add(stageTxt);
+		//add(stageTxt);
 		
-		var toolIdx:Int = selectedToolIdx == -1 ? -1 : toolLibrary.get(currentTools[selectedToolIdx].id).templateID;
-		toolTxt = new FlxText(5, 50, 0, "tool: " + ((selectedToolIdx == -1) ? "none" : Std.string(toolIdx)), 14);
+		var toolIdx:String = selectedToolIdx == -1 ? "none" : toolLibrary.get(currentTools[selectedToolIdx].id).name;
+		toolTxt = new FlxText(5, 5, 0, "Tool: " + toolIdx, 14);
 		stageTxt.color = FlxColor.WHITE;
 		add(toolTxt);
 		
-		lvTxt = new FlxText(5, 70, 0, "Level  " + Reg.level + " - " + Reg.levels[Reg.level], 14);
+		lvTxt = new FlxText(5, 30, 0, "Level  " + Reg.level, 14);// + " - " + Reg.levels[Reg.level], 14);
 		lvTxt.color = FlxColor.WHITE;
 		add(lvTxt);
 		
@@ -394,8 +394,8 @@ class PlayState extends FlxState
 		}
 		
 		stageTxt.text = "stage: " + stageMode;
-		var toolIdx:Int = selectedToolIdx == -1 ? -1 : toolLibrary.get(currentTools[selectedToolIdx].id).templateID;
-		toolTxt.text = "tool: " + (selectedToolIdx == -1 ? "none" : Std.string(toolIdx));
+		var toolIdx:String = selectedToolIdx == -1 ? "none" : toolLibrary.get(currentTools[selectedToolIdx].id).name;
+		toolTxt.text = "Tool: " + toolIdx;
 		
 	}
 	
@@ -428,13 +428,7 @@ class PlayState extends FlxState
 		}
 		else 
 		{
-			for (child in this)
-			{
-				if (child == select)
-				{
-					remove(select);
-				}
-			}
+			remove(select);
 		}
 	}
 	
@@ -491,8 +485,15 @@ class PlayState extends FlxState
 		{
 			resetTools();
 		}
-		setStageMode(StageMode.EDIT);
-		// TODO: On Over we should probably do something different
+		if (stageMode != StageMode.OVER)
+		{
+			setStageMode(StageMode.EDIT);
+			// TODO: On Over we should probably do something different			
+		}
+		else 
+		{
+			FlxG.switchState(new MenuState());
+		}
 	}
 	
 	public function isPlaying():Bool
@@ -509,6 +510,7 @@ class PlayState extends FlxState
 		var btnNames:Array<String> = ["DIR-L", "DIR-R", "DIR-U", "DIR-D"];
 		var linkedEntities:Array<String> = ["", "", "", ""];
 		var allowedTypes:Array<TileType> = [TileType.GROUND, TileType.GROUND, TileType.GROUND, TileType.GROUND];
+		var names:Array<String> = ["Go left", "Go right", "Go up", "Go down"];
 		
 		var spritePath:String = "assets/images/entities_00.png";
 		var spriteAnims:Array<Array<Int>> = [[10,11], [6,7], [8,9], [12,13]];
@@ -524,6 +526,7 @@ class PlayState extends FlxState
 			placeable.spritePath = spritePath;
 			placeable.spriteAnims = spriteAnims[i];
 			placeable.allowedTileType = allowedTypes[i];
+			placeable.name = names[i];
 			toolLibrary[i] = placeable;
 		}
 	}
@@ -554,6 +557,7 @@ class PlayState extends FlxState
 		{
 			case StageMode.EDIT:
 			{
+				remove(select);
 				playerTrailLayer.remove(playerTrail);
 				// Clear everything
 				for (a in actors)
@@ -563,6 +567,8 @@ class PlayState extends FlxState
 			}
 			case StageMode.PLAY:
 			{
+				selectedToolIdx = -1;
+				remove(select);
 				if (stageMode == EDIT)
 				{
 					timeToAwake = AWAKE_DELAY;
@@ -582,6 +588,8 @@ class PlayState extends FlxState
 			}
 			case StageMode.PAUSE:
 			{
+				selectedToolIdx = -1;
+				remove(select);
 				for (a in actors)
 				{
 					a.pause(true);
@@ -590,6 +598,8 @@ class PlayState extends FlxState
 			}
 			case StageMode.OVER:
 			{
+				selectedToolIdx = -1;
+				remove(select);
 				playerTrailLayer.remove(playerTrail);
 				for (a in actors)
 				{
@@ -616,8 +626,7 @@ class PlayState extends FlxState
 	{
 		if (Reg.level >= Reg.levels.length - 1)
 		{
-			// NO MOAR. Restart or back to menu
-			Reg.level = 0;
+			FlxG.switchState(new EndState());
 		}
 		else 
 		{

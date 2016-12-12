@@ -30,10 +30,12 @@ class Player extends FlxSprite implements Actor
 	private var speed:Float;
 	
 			var wallSound:FlxSound;
+	private var interactedLastFrame:Bool;
 	// stuff
 	
 	public override function update(dt:Float):Void 
 	{
+		var interact:Bool = false;
 		var ox1:Int = Math.round(x+2);
 		var oy1:Int = Math.round(y+2);
 		var ox2:Int = Math.floor(x -2+ parent.levelData.tileWidth);
@@ -82,7 +84,7 @@ class Player extends FlxSprite implements Actor
 				var goalCoords:FlxPoint = parent.levelData.getTilePositionFromWorld(Math.round(parent.goal.x), Math.round(parent.goal.y));
 				var midPos:FlxPoint = getMidpoint();
 				var midPointCoords:FlxPoint = parent.levelData.getTilePositionFromWorld(Math.round(midPos.x), Math.round(midPos.y));
-				
+				var midCoords:FlxPoint = parent.levelData.getWorldPositionFromTileCoords(midPointCoords);
 				if (goalCoords.equals(midPointCoords) &&  midPos.distanceTo(parent.goal.getMidpoint()) < 5)
 				{
 					trace("yeah!");
@@ -90,22 +92,18 @@ class Player extends FlxSprite implements Actor
 				}
 				else 
 				{
-					var item:PlaceableItem = parent.getItemAtPos(midPointCoords);
-					if (item != null)
-					{
-						var itemMid:FlxPoint = item.getMidpoint();
-						if (midPos.distanceTo(itemMid) < 5)
-						{					
-							item.onEntityInteracted(this);
-						}
-						itemMid.put();
-						midPos.put();
+					if (checkInteraction() && !interactedLastFrame)
+					{						
+						setPosition(midCoords.x, midCoords.y);
+						interact = true;
 					}
-					else 
+					else
 					{
 						var tData:TileData = parent.levelData.getTileAt(midPointCoords);
+						var midTilePos:FlxPoint = parent.levelData.getWorldPositionFromTileCoords(midPointCoords);
+						midTilePos.add(parent.levelData.tileWidth / 2, parent.levelData.tileHeight / 2);						
 						var type:TileType = tData == null? TileType.EMPTY : tData.type;
-						if (type == TileType.GAP && (coordsTL.equals(coordsBR)))
+						if (type == TileType.GAP && midPos.distanceTo(midTilePos) < 5)
 						{
 							parent.onFellDown();
 							goalCoords.put();
@@ -119,6 +117,7 @@ class Player extends FlxSprite implements Actor
 							oldTR.put();
 							oldBL.put();
 							oldBR.put();
+							interactedLastFrame = false;
 							return;
 						}
 						
@@ -137,7 +136,7 @@ class Player extends FlxSprite implements Actor
 						var wallHitBR = type == TileType.EMPTY || type == TileType.WALL || parent.levelData.hitsEdgeAt(oldBR, coordsBR);
 						if (wallHitTL || wallHitTR || wallHitBL || wallHitBR)
 						{
-							setPosition(oldPos.x,oldPos.y);
+							setPosition(midCoords.x, midCoords.y);						
 							changeFacing(calculateNextFacing());
 							if (!wallSound.playing) { wallSound.play(); }
 							FlxG.camera.shake(0.0004, 0.1);
@@ -149,6 +148,7 @@ class Player extends FlxSprite implements Actor
 				midPointCoords.put();
 			}
 		}
+		interactedLastFrame = interact;
 		oldPos.put();
 		if (coordsTL != null) coordsTL.put();
 		if (coordsTR != null) coordsTR.put();
@@ -158,6 +158,30 @@ class Player extends FlxSprite implements Actor
 		oldTR.put();
 		oldBL.put();
 		oldBR.put();
+	}
+	
+	public function checkInteraction():Bool
+	{
+		var midPos:FlxPoint = getMidpoint();
+		var midPointCoords:FlxPoint = parent.levelData.getTilePositionFromWorld(Math.round(midPos.x), Math.round(midPos.y));
+				
+		var item:PlaceableItem = parent.getItemAtPos(midPointCoords);
+		if (item != null)
+		{
+			var itemMid:FlxPoint = item.getMidpoint();
+			if (midPos.distanceTo(itemMid) < 5)
+			{					
+				item.onEntityInteracted(this);
+				return true;				
+			}
+			midPos.put();
+			midPointCoords.put();
+			itemMid.put();
+		}
+		midPos.put();
+		midPointCoords.put();
+		return false;
+
 	}
 
 	public function new() 
@@ -222,7 +246,9 @@ class Player extends FlxSprite implements Actor
 	
 	public function startPlaying():Void
 	{
+		interactedLastFrame = checkInteraction();
 		adjustVelocity();
+		
 	}
 
 	

@@ -89,9 +89,6 @@ class PlaceableItem extends FlxSprite implements Actor
 			var p:Player = cast a;
 			if (itemData.type == "changeDir")
 			{
-				//var myCoords:FlxPoint = parent.levelData.getTilePositionFromWorld(Math.round(x), Math.round(y));
-				//var midCoords:FlxPoint = parent.levelData.getWorldPositionFromTileCoords(myCoords);
-				//p.setPosition(midCoords.x, midCoords.y);
 				switch(itemData.subtype)
 				{
 					case "left": 
