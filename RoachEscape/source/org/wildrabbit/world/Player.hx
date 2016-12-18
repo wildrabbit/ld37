@@ -22,8 +22,16 @@ using flixel.util.FlxSpriteUtil;
  * ...
  * @author ith1ldin
  */
-class Player extends FlxSprite implements Actor
+class Player extends Actor
 {
+	public static inline var PLAYER_WIDTH:Int = 64;
+	public static inline var PLAYER_HEIGHT:Int = 64;
+	
+	public static inline var PLAYER_HITBOX_WIDTH:Int = 48;
+	public static inline var PLAYER_HITBOX_HEIGHT:Int = 48;
+	
+	private static inline var MIDPOINT_DISTANCE_THRESHOLD:Int = 5;
+	
 	private var initData: PlayerData;
 	private var parent: PlayState;
 	
@@ -33,20 +41,37 @@ class Player extends FlxSprite implements Actor
 	private var interactedLastFrame:Bool;
 	// stuff
 	
+	
+	public function new() 
+	{
+		super(0, 0);
+		loadGraphic(AssetPaths.entities_00__png, true, PLAYER_WIDTH, PLAYER_HEIGHT,false);
+		setFacingFlip(FlxObject.LEFT, true, false);
+		setFacingFlip(FlxObject.RIGHT, false, false);
+		setFacingFlip(FlxObject.UP, false, false);
+		setFacingFlip(FlxObject.DOWN, false, true);
+		animation.add("horizontal", [1], 1, false);
+		animation.add("vertical", [0], 1, false);
+		animation.play("horizontal");
+	}
+	
 	public override function update(dt:Float):Void 
 	{
 		var interact:Bool = false;
-		var ox1:Int = Math.round(x+2);
-		var oy1:Int = Math.round(y+2);
-		var ox2:Int = Math.floor(x -2+ parent.levelData.tileWidth);
-		var oy2:Int = Math.floor(y -2 + parent.levelData.tileHeight);
+		var hitboxDeltaX:Int = PLAYER_WIDTH - PLAYER_HITBOX_WIDTH;
+		var hitboxDeltaY:Int = PLAYER_HEIGHT - PLAYER_HITBOX_HEIGHT;
+		
+		var ox1:Int = Math.round(relX + hitboxDeltaX/2 );
+		var oy1:Int = Math.round(relY + hitboxDeltaY/2);
+		var ox2:Int = Math.floor(relX + hitboxDeltaX/2 + PLAYER_HITBOX_WIDTH);
+		var oy2:Int = Math.floor(relY + hitboxDeltaY/2 + PLAYER_HITBOX_HEIGHT);
 		
 		var oldTL:FlxPoint = parent.levelData.getTilePositionFromWorld(ox1, oy1);
 		var oldTR:FlxPoint = parent.levelData.getTilePositionFromWorld(ox2, oy1);
 		var oldBL:FlxPoint = parent.levelData.getTilePositionFromWorld(ox1, oy2);
 		var oldBR:FlxPoint = parent.levelData.getTilePositionFromWorld(ox2, oy2);
 
-		var oldPos:FlxPoint = FlxPoint.get(x, y);
+		var oldPos:FlxPoint = getRelativePos();
 		var coordsTL:FlxPoint = null;
 		var coordsBR:FlxPoint = null;
 		var coordsTR:FlxPoint = null;
@@ -57,11 +82,13 @@ class Player extends FlxSprite implements Actor
 		wallSound.stop();		
 		
 		super.update(dt);
+		relX = x - offsetX;
+		relY = y - offsetY;
 
-		var x1:Int = Math.round(x+2);
-		var y1:Int = Math.round(y+2);
-		var x2:Int = Math.floor(x -2+ parent.levelData.tileWidth);
-		var y2:Int = Math.floor(y -2+ parent.levelData.tileHeight);
+		var x1:Int = Math.round(relX + hitboxDeltaX/2 );
+		var y1:Int = Math.round(relY + hitboxDeltaY/2);
+		var x2:Int = Math.floor(relX + hitboxDeltaX/2 + PLAYER_HITBOX_WIDTH);
+		var y2:Int = Math.floor(relY + hitboxDeltaY/2 + PLAYER_HITBOX_HEIGHT);
 		
 		if (parent == null) return;
 		
@@ -76,16 +103,17 @@ class Player extends FlxSprite implements Actor
 			
 			if (!parent.levelData.validCoords(coordsTL) || !parent.levelData.validCoords(coordsTR)  || !parent.levelData.validCoords(coordsBL) || !parent.levelData.validCoords(coordsBR) )
 			{
-				setPosition(oldPos.x, oldPos.y);
+				setRelativePos(oldPos.x, oldPos.y);
 				velocity.set();
 			}
 			else 
 			{
-				var goalCoords:FlxPoint = parent.levelData.getTilePositionFromWorld(Math.round(parent.goal.x), Math.round(parent.goal.y));
+				var goalCoords:FlxPoint = parent.levelData.getTilePositionFromWorld(Math.round(parent.goal.relX), Math.round(parent.goal.relY));
 				var midPos:FlxPoint = getMidpoint();
+				midPos.subtract(offsetX, offsetY);
 				var midPointCoords:FlxPoint = parent.levelData.getTilePositionFromWorld(Math.round(midPos.x), Math.round(midPos.y));
 				var midCoords:FlxPoint = parent.levelData.getWorldPositionFromTileCoords(midPointCoords);
-				if (goalCoords.equals(midPointCoords) &&  midPos.distanceTo(parent.goal.getMidpoint()) < 5)
+				if (goalCoords.equals(midPointCoords) &&  midPos.distanceTo(parent.goal.getMidpoint().subtract(parent.goal.offsetX, parent.goal.offsetY)) < MIDPOINT_DISTANCE_THRESHOLD)
 				{
 					trace("yeah!");
 					parent.onReachedGoal();
@@ -94,16 +122,17 @@ class Player extends FlxSprite implements Actor
 				{
 					if (checkInteraction() && !interactedLastFrame)
 					{						
-						setPosition(midCoords.x, midCoords.y);
+						setRelativePos(midCoords.x, midCoords.y);
 						interact = true;
 					}
 					else
 					{
 						var tData:TileData = parent.levelData.getTileAt(midPointCoords);
 						var midTilePos:FlxPoint = parent.levelData.getWorldPositionFromTileCoords(midPointCoords);
+						//midTilePos.subtract(offsetX, offsetY);
 						midTilePos.add(parent.levelData.tileWidth / 2, parent.levelData.tileHeight / 2);						
 						var type:TileType = tData == null? TileType.EMPTY : tData.type;
-						if (type == TileType.GAP && midPos.distanceTo(midTilePos) < 5)
+						if (type == TileType.GAP && midPos.distanceTo(midTilePos) < MIDPOINT_DISTANCE_THRESHOLD)
 						{
 							parent.onFellDown();
 							goalCoords.put();
@@ -136,10 +165,10 @@ class Player extends FlxSprite implements Actor
 						var wallHitBR = type == TileType.EMPTY || type == TileType.WALL || parent.levelData.hitsEdgeAt(oldBR, coordsBR);
 						if (wallHitTL || wallHitTR || wallHitBL || wallHitBR)
 						{
-							setPosition(midCoords.x, midCoords.y);						
+							setRelativePos(midCoords.x, midCoords.y);						
 							changeFacing(calculateNextFacing());
 							if (!wallSound.playing) { wallSound.play(); }
-							FlxG.camera.shake(0.0004, 0.1);
+							//FlxG.camera.shake(0.0004, 0.1);
 						}	
 					}
 				}
@@ -163,13 +192,15 @@ class Player extends FlxSprite implements Actor
 	public function checkInteraction():Bool
 	{
 		var midPos:FlxPoint = getMidpoint();
+		midPos.subtract(offsetX, offsetY);
 		var midPointCoords:FlxPoint = parent.levelData.getTilePositionFromWorld(Math.round(midPos.x), Math.round(midPos.y));
 				
 		var item:PlaceableItem = parent.getItemAtPos(midPointCoords);
 		if (item != null)
 		{
 			var itemMid:FlxPoint = item.getMidpoint();
-			if (midPos.distanceTo(itemMid) < 5)
+			itemMid.subtract(item.offsetX, item.offsetY);
+			if (midPos.distanceTo(itemMid) < MIDPOINT_DISTANCE_THRESHOLD)
 			{					
 				item.onEntityInteracted(this);
 				return true;				
@@ -184,26 +215,8 @@ class Player extends FlxSprite implements Actor
 
 	}
 
-	public function new() 
-	{
-		super(0, 0);
-		loadGraphic(AssetPaths.entities_00__png, true, 64, 64,false);
-		setFacingFlip(FlxObject.LEFT, true, false);
-		setFacingFlip(FlxObject.RIGHT, false, false);
-		setFacingFlip(FlxObject.UP, false, false);
-		setFacingFlip(FlxObject.DOWN, false, true);
-		animation.add("horizontal", [1], 1, false);
-		animation.add("vertical", [0], 1, false);
-		animation.play("horizontal");
-				//var lStyle: LineStyle = { color: FlxColor.BLACK, thickness: 1 };
-		//var dStyle: DrawStyle = { smoothing: true };
-		//
-		//FlxSpriteUtil.drawCircle(this, -1, -1, 24, FlxColor.BLACK, lStyle, dStyle);
-		//FlxSpriteUtil.drawCircle(this, x + 24, y + 16, 6, FlxColor.YELLOW, lStyle, dStyle);
-		//FlxSpriteUtil.drawCircle(this, x + 40, y + 16, 6, FlxColor.YELLOW, lStyle, dStyle);
-	}
 	
-	public function pause(value:Bool):Void
+	public override function pause(value:Bool):Void
 	{
 		if (value)
 		{
@@ -224,31 +237,25 @@ class Player extends FlxSprite implements Actor
 		speed = initData.speed;
 		changeFacing(initData.facing);
 		var pos:FlxPoint = parent.levelData.getWorldPositionFromTileCoords(initData.start);
-		setPosition(pos.x, pos.y);
+		setRelativePos(pos.x, pos.y);
 		
 		velocity.set();
-		FlxG.watch.add(this, "x");
-		FlxG.watch.add(this, "y");
-		FlxG.watch.add(this.velocity, "x", "vX");
-		FlxG.watch.add(this.velocity, "y", "vY");
-	
 	}
 	
-	public function resetToDefaults():Void
+	public override function resetToDefaults():Void
 	{
 		visible = true;
 		speed = initData.speed;
 		changeFacing(initData.facing);
 		var pos:FlxPoint = parent.levelData.getWorldPositionFromTileCoords(initData.start);
-		setPosition(pos.x, pos.y);
+		setRelativePos(pos.x, pos.y);
 		velocity.set();
 	}
 	
-	public function startPlaying():Void
+	public override function startPlaying():Void
 	{
 		interactedLastFrame = checkInteraction();
-		adjustVelocity();
-		
+		adjustVelocity();		
 	}
 
 	
@@ -284,10 +291,7 @@ class Player extends FlxSprite implements Actor
 				animationName = "vertical";
 			}
 		}
-		//acceleration.set(600, 0);
-		//acceleration.rotate(FlxPoint.weak(0, 0), faceAngle);
-		//maxVelocity.set(speed, 0);
-		//maxVelocity.rotate(FlxPoint.weak(0, 0), faceAngle);
+
 		velocity.set(speed, 0);
 		velocity.rotate(FlxPoint.weak(0, 0), faceAngle);
 		animation.play(animationName);

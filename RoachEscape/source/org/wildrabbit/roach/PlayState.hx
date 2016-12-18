@@ -7,6 +7,7 @@ import flixel.addons.editors.tiled.TiledTileLayer;
 import flixel.addons.editors.tiled.TiledTileSet;
 import flixel.addons.effects.FlxTrail;
 import flixel.addons.tile.FlxTilemapExt;
+import flixel.group.FlxGroup;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.input.FlxPointer;
 import flixel.math.FlxPoint;
@@ -22,6 +23,7 @@ import haxe.ds.Vector;
 import openfl.Assets;
 import org.wildrabbit.ui.HUD;
 import org.wildrabbit.world.Actor;
+import org.wildrabbit.world.GameContainer;
 import org.wildrabbit.world.Goal;
 import org.wildrabbit.world.LevelData;
 import org.wildrabbit.world.PlaceableItem;
@@ -55,31 +57,26 @@ typedef PlaceableItemTool =
  */
 class PlayState extends FlxState
 {
+	public static inline var X_OFFSET:Int = 64;
+	public static inline var Y_OFFSET:Int = 64;
+	
 	private static inline var AWAKE_DELAY:Float = 0.3;
 	public var levelData:LevelData;
 	
-	private var layerVec: Array<FlxTilemapExt>;
+	public var gameContainer:GameContainer;
 	
-	// HACK to control the entities depths
-	private var bgLayers = new FlxTypedGroup<FlxTilemapExt>();
-	private var mapLayers:FlxTypedGroup<FlxTilemapExt>;
-	public var placedItems: FlxTypedGroup<PlaceableItem>;
-	private var playerLayer: FlxTypedGroup<Player>;
-	private var goalLayer: FlxTypedGroup<Goal>;
-	
-	private var bgLayer:FlxTilemapExt;
+	private var baseBackgroundLayer:FlxTilemapExt;
 	
 	private var hud:HUD;
 	
-	private var title:FlxText;
-	
 	private var stageMode:StageMode;
 	private var timeToAwake:Float;
-	private var result:Result;
+	public var result (default,null):Result;
 	
 	private var selectedToolIdx:Int;
 	private var selectedPlaceable:PlaceableItem;
 	
+#if debug
 	private var back:FlxButton;
 	private var next:FlxButton;
 	private var toggleSpeed:FlxButton;
@@ -87,7 +84,7 @@ class PlayState extends FlxState
 	private var stageTxt:FlxText;
 	private var toolTxt:FlxText;
 	private var lvTxt:FlxText;
-	
+#end	
 	private var select:FlxSprite;
 
 	public var player:Player;
@@ -104,8 +101,9 @@ class PlayState extends FlxState
 	private var placeClick:FlxSound;
 	private var wrongPlaceClick:FlxSound;
 	
+	public var fastForward(default,null):Bool = false;
+	
 	private var playerTrail:FlxTrail;
-	private var playerTrailLayer:FlxTypedGroup<FlxTrail>;
 	
 	/**
 	 * Function that is called up when to state is created to set it up.
@@ -113,9 +111,13 @@ class PlayState extends FlxState
 	override public function create():Void
 	{
 		super.create();
+		
 		currentTools = new Array<PlaceableItemTool>();
 		
 		buildItemLibrary();
+		
+		gameContainer = new GameContainer(X_OFFSET, Y_OFFSET);
+		add(gameContainer);
 		
 		actors = new Array<Actor>();
 		
@@ -124,73 +126,42 @@ class PlayState extends FlxState
 		
 		player = null;
 		goal = null;
-		layerVec = new Array<FlxTilemapExt>();
 		
-		bgLayers = new FlxTypedGroup<FlxTilemapExt>();
-		add(bgLayers);
-		bgLayer = null;
+		baseBackgroundLayer = null;
 		
-		placedItems = new FlxTypedGroup<PlaceableItem>();
-		add(placedItems);
-		
-		
-		goalLayer = new FlxTypedGroup<Goal>();
-		add(goalLayer);
-		
-		playerTrailLayer = new FlxTypedGroup<FlxTrail>();
-		add(playerTrailLayer);
-
-		playerLayer = new FlxTypedGroup<Player>();
-		add(playerLayer);
 		selectedToolIdx = -1;
 
-		mapLayers = new FlxTypedGroup<FlxTilemapExt>();
-		add(mapLayers);
-
-		
 		levelData = new LevelData(Reg.levels[Reg.level]);
 		levelData.build(this);
 		
 		resetToolLoadout();
 		
-		//thisLevelTools = [
-			//{id:0, amount:1 },
-			//{id:1, amount:2 },
-		//];
-		//currentTools = [
-			//{id:0, amount:1 },
-			//{id:1, amount:2 },
-		//];
-		
 		select = new FlxSprite(0, 0, AssetPaths.select__png);
 		
 		hud = new HUD(this);
-		hud.buildToolButtons(currentTools, toolLibrary);
+		hud.editPanel.buildToolButtons(currentTools, toolLibrary);
 		hud.onStageModeChanged(stageMode);
 		add(hud);
 		
-		title = new FlxText(850, 44, 0, "TOOLS", 24);
-		title.color.setRGB(130, 0, 37);
-		add(title);
+#if debug
 		
 		back = new FlxButton(5, 5, "prev", function():Void
 		{
 			Reg.level = (Reg.levels.length + Reg.level - 1) % Reg.levels.length;
 			FlxG.switchState(new PlayState());
 		});
-		
-		//add(back);
+		add(back);
 		
 		next = new FlxButton(80, 5, "next", function():Void 
 		{
 			Reg.level = (Reg.level + 1) % Reg.levels.length;
 			FlxG.switchState(new PlayState());
 		} );
-		//add(next);
+		add(next);
 		
 		stageTxt = new FlxText(5, 30, 0, "stage: " + stageMode, 14);
 		stageTxt.color = FlxColor.WHITE;
-		//add(stageTxt);
+		add(stageTxt);
 		
 		var toolIdx:String = selectedToolIdx == -1 ? "none" : toolLibrary.get(currentTools[selectedToolIdx].id).name;
 		toolTxt = new FlxText(5, 5, 0, "Tool: " + toolIdx, 14);
@@ -200,10 +171,12 @@ class PlayState extends FlxState
 		lvTxt = new FlxText(5, 30, 0, "Level  " + Reg.level, 14);// + " - " + Reg.levels[Reg.level], 14);
 		lvTxt.color = FlxColor.WHITE;
 		add(lvTxt);
-		
+#end		
 		goalSound = new FlxSound();
 		goalSound.loadEmbedded(AssetPaths.goal__wav);
 		goalSound.stop();
+		
+		fastForward = false;
 		
 	}
 	
@@ -211,10 +184,9 @@ class PlayState extends FlxState
 	 {					
 		player = new Player();
 		player.init(this, playerData);
-		playerLayer.add(player);
+		gameContainer.addToPlayerLayer(player);
 		playerTrail = new FlxTrail(player);
 
-		
 		actors.push(player);
 	 }
 	 
@@ -222,26 +194,25 @@ class PlayState extends FlxState
 	 {
 		goal = new Goal();
 		var pos:FlxPoint = levelData.getWorldPositionFromTileCoords(startCoords);
-		goal.setPosition(pos.x, pos.y);
-		goalLayer.add(goal);
+		goal.setRelativePos(pos.x, pos.y);
+		gameContainer.addToActorLayer(goal);
 		
 		actors.push(goal);
 	 }
 	
-	public function addTileLayer(layer:FlxTilemapExt):Void
+	public function addEdgeLayer(layer:FlxTilemapExt):Void
 	{
-		mapLayers.add(layer);
-		layerVec.push(layer);
+		gameContainer.addToMapLayer(0, 0, layer, GameContainer.EDGES_IDX);
 	}
 	
-	public function setBgLayer(layer:FlxTilemapExt):Void
+	public function addBackgroundLayer(layer:FlxTilemapExt):Void
 	{
-		if (bgLayer != null)
-			bgLayers.remove(bgLayer);
-		bgLayer = layer;
-		//FlxMouseEventManager.add(bgLayer, click, null, null, null, false, true);
-		layerVec.push(layer);
-		bgLayers.add(bgLayer);
+		if (baseBackgroundLayer != null)
+		{
+			gameContainer.removeMapLayer(baseBackgroundLayer, GameContainer.BACKGROUND_IDX);
+		}
+		baseBackgroundLayer = layer;
+		gameContainer.addToMapLayer(0,0,baseBackgroundLayer, GameContainer.BACKGROUND_IDX);
 	}
 
 	/**
@@ -251,14 +222,12 @@ class PlayState extends FlxState
 	override public function destroy():Void
 	{
 		super.destroy();
+		actors.splice(0, actors.length);
 		actors = null;
-		layerVec = null;
+		
 		player = null;
 		goal = null;
-		placedItems = null;
-		mapLayers = null;
-		bgLayer = null;
-		bgLayers = null;
+		baseBackgroundLayer = null;
 		hud = null;
 	}
 	
@@ -267,9 +236,9 @@ class PlayState extends FlxState
 		var pos:FlxPoint = FlxPoint.get();
 		var newPos:FlxPoint = FlxPoint.get();
 		var ret:PlaceableItem = null;
-		for (item in placedItems)
+		for (item in gameContainer.placedItemsLayer)
 		{
-			item.getPosition(pos);
+			item.getRelativePos(pos);
 			pos.x += item.width/2;
 			pos.y += item.height/2;
 			
@@ -299,7 +268,7 @@ class PlayState extends FlxState
 		var pos:FlxPoint = FlxG.mouse.getWorldPosition();			
 		FlxG.log.add(stageMode);
 		FlxG.log.add("mouse: " + pos.x + "," + pos.y);
-		var fits:Bool = pos.x >= bgLayer.x && pos.x < bgLayer.x + bgLayer.width && pos.y >= bgLayer.y && pos.y < bgLayer.y + bgLayer.height;
+		var fits:Bool = pos.x >= baseBackgroundLayer.x && pos.x < baseBackgroundLayer.x + baseBackgroundLayer.width && pos.y >= baseBackgroundLayer.y && pos.y < baseBackgroundLayer.y + baseBackgroundLayer.height;
 		var mouseReleased:Bool = FlxG.mouse.justReleased;
 		FlxG.log.add("pos Inside" + fits);
 		FlxG.log.add("released? " + mouseReleased);
@@ -308,7 +277,7 @@ class PlayState extends FlxState
 			if (fits && mouseReleased)
 			{
 				var coords:FlxPoint = null;
-				pos.subtract(bgLayer.x, bgLayer.y);
+				pos.subtract(baseBackgroundLayer.x, baseBackgroundLayer.y);
 				coords = levelData.getTilePositionFromWorld(Math.round(pos.x), Math.round(pos.y));
 				trace("click! (" + coords.x + "," + coords.y + ")");
 				
@@ -335,26 +304,18 @@ class PlayState extends FlxState
 								if (currentTools[i].id == templateID && currentTools[i].amount < Reg.levelToolLoadouts[Reg.level][i].amount)
 								{
 									currentTools[i].amount++;
-									hud.updateTool(i, currentTools[i].amount);
+									hud.editPanel.updateTool(i, currentTools[i].amount);
 								}
 							}
 							trace ("Entity #" + entity.itemData.templateID);
-							placedItems.remove(entity);
+							gameContainer.removePlaceableItem(entity);
 							actors.remove(entity);
 							entity.destroy();							
 						}
 						
 						if (willReplace)
 						{
-							var item:PlaceableItem = new PlaceableItem();
-							item.init(this, selectedToolData);
-							var newCoords:FlxPoint = levelData.getWorldPositionFromTileCoords(coords);
-							item.setPosition(newCoords.x, newCoords.y);
-							newCoords.put();
-							currentTools[selectedToolIdx].amount--;
-							hud.updateTool(selectedToolIdx, currentTools[selectedToolIdx].amount);
-							placedItems.add(item);
-							actors.push(item);
+							createNewPlaceableItem(selectedToolData, coords);
 						}
 
 					}
@@ -362,15 +323,7 @@ class PlayState extends FlxState
 						trace ("No entity!");
 						if (selectedToolIdx >= 0 && currentTools[selectedToolIdx].amount > 0)
 						{
-							var item:PlaceableItem = new PlaceableItem();
-							item.init(this, toolLibrary.get(currentTools[selectedToolIdx].id));
-							var newCoords:FlxPoint = levelData.getWorldPositionFromTileCoords(coords);
-							item.setPosition(newCoords.x, newCoords.y);
-							newCoords.put();							
-							currentTools[selectedToolIdx].amount--;
-							hud.updateTool(selectedToolIdx, currentTools[selectedToolIdx].amount);							
-							placedItems.add(item);
-							actors.push(item);
+							createNewPlaceableItem(toolLibrary.get(currentTools[selectedToolIdx].id), coords);
 						}
 					}
 				}
@@ -385,18 +338,30 @@ class PlayState extends FlxState
 			if (timeToAwake <= 0)
 			{
 				playerTrail.resetTrail();
-				playerTrailLayer.add(playerTrail);
-				for (a in actors)
-				{
-					a.startPlaying();
-				}
+				gameContainer.addToSpriteLayer(playerTrail, GameContainer.SPRITE_PLAYER_BG_IDX);
+				for (a in actors) { a.startPlaying(); };
 			}
 		}
 		
+#if debug
 		stageTxt.text = "stage: " + stageMode;
 		var toolIdx:String = selectedToolIdx == -1 ? "none" : toolLibrary.get(currentTools[selectedToolIdx].id).name;
 		toolTxt.text = "Tool: " + toolIdx;
+#end
 		
+	}
+	
+	private function createNewPlaceableItem(toolData:PlaceableItemData, coords:FlxPoint):Void
+	{
+		var item:PlaceableItem = new PlaceableItem();
+		item.init(this, toolData);
+		var newCoords:FlxPoint = levelData.getWorldPositionFromTileCoords(coords);
+		item.setRelativePos(newCoords.x, newCoords.y);
+		newCoords.put();
+		currentTools[selectedToolIdx].amount--;
+		hud.editPanel.updateTool(selectedToolIdx, currentTools[selectedToolIdx].amount);
+		gameContainer.addToPlaceableLayer(item);
+		actors.push(item);
 	}
 	
 	public function toggleTool(i:Int):Void
@@ -417,7 +382,7 @@ class PlayState extends FlxState
 				selectedToolIdx = i;
 				trace("current tool: " + toolLibrary.get(currentTools[selectedToolIdx].id).templateID);			
 				add(select);
-				var pos:FlxPoint = hud.tools[i].getMidpoint();
+				var pos:FlxPoint = hud.editPanel.tools[i].getMidpoint();
 				pos.subtract(select.width / 2, select.height / 2);
 				select.setPosition(pos.x, pos.y);
 				FlxTween.tween(select.scale, { x:1.1, y:1.1}, 0.5, { type:FlxTween.PINGPONG } );
@@ -434,25 +399,7 @@ class PlayState extends FlxState
 	
 	public function playPressed():Void
 	{
-		switch(stageMode)
-		{
-			case StageMode.EDIT:
-			{
-				setStageMode(StageMode.PLAY);
-			}
-			case StageMode.PAUSE: 
-			{ 
-				setStageMode(StageMode.PLAY);
-			}
-			case StageMode.PLAY: 
-			{ 
-				setStageMode(StageMode.PAUSE);
-			}	
-			case StageMode.OVER: 
-			{ 
-				setStageMode(StageMode.EDIT);
-			}	
-		}
+		setStageMode(StageMode.PLAY);		
 	}
 	private function resetToolLoadout():Void
 	{		
@@ -465,18 +412,17 @@ class PlayState extends FlxState
 	}
 	private function resetTools():Void
 	{
-		for (i in placedItems)
+		for (item in gameContainer.placedItemsLayer)
 		{
-			actors.remove(i);
+			actors.remove(item);
 		}
-		placedItems.forEach(function(x:PlaceableItem):Void { x.destroy(); } );
-		placedItems.clear();
+		gameContainer.resetPlaceableItems();
 		selectedToolIdx = -1;
 		selectedPlaceable = null;
 		resetToolLoadout();
 		for (i in 0...currentTools.length)
 		{
-			hud.updateTool(i, currentTools[i].amount);
+			hud.editPanel.updateTool(i, currentTools[i].amount);
 		}
 	}
 	public function resetPressed(): Void 
@@ -557,58 +503,51 @@ class PlayState extends FlxState
 		{
 			case StageMode.EDIT:
 			{
+				resetTimescale();
 				remove(select);
-				playerTrailLayer.remove(playerTrail);
+				gameContainer.removeFromSpriteLayer(playerTrail, GameContainer.SPRITE_PLAYER_BG_IDX);
 				// Clear everything
-				for (a in actors)
-				{
-					a.resetToDefaults();
-				}
+				for (a in actors) { a.resetToDefaults();}
 			}
 			case StageMode.PLAY:
 			{
 				selectedToolIdx = -1;
 				remove(select);
-				if (stageMode == EDIT)
+				if (stageMode != PAUSE)
 				{
+					for (a in actors) { a.resetToDefaults();}
+					resetTimescale(); // We should never need to check this
 					timeToAwake = AWAKE_DELAY;
 					selectedToolIdx = -1;
 					selectedPlaceable = null;					
 				}
-				else if (stageMode == PAUSE)
+				else
 				{
-					for (a in actors)
-					{
-						a.pause(false);
-
-					}
-				playerTrail.resetTrail();
-				playerTrailLayer.add(playerTrail);
+					setFastForward(fastForward);
+					for (a in actors) { a.pause(false);}
+					playerTrail.resetTrail();
+					gameContainer.addToSpriteLayer(playerTrail, GameContainer.SPRITE_PLAYER_BG_IDX);					
 				}
 			}
 			case StageMode.PAUSE:
 			{
+				resetTimescale(true);
 				selectedToolIdx = -1;
 				remove(select);
-				for (a in actors)
-				{
-					a.pause(true);
-				}
-				playerTrailLayer.remove(playerTrail);
+				for (a in actors) { a.pause(true); }
+				gameContainer.removeFromSpriteLayer(playerTrail, GameContainer.SPRITE_PLAYER_BG_IDX);
 			}
 			case StageMode.OVER:
 			{
+				resetTimescale();
 				selectedToolIdx = -1;
 				remove(select);
-				playerTrailLayer.remove(playerTrail);
-				for (a in actors)
-				{
-					a.pause(true);		
-				}
+				gameContainer.removeFromSpriteLayer(playerTrail, GameContainer.SPRITE_PLAYER_BG_IDX);
+				for (a in actors) { a.pause(true);}
 					
 				if (result == Result.WON)
 				{
-					var youWon:FlxText = new FlxText((bgLayer.x + bgLayer.width) / 2, (bgLayer.y + bgLayer.height) / 2, 0, "WELL DONE!", 72);
+					var youWon:FlxText = new FlxText((baseBackgroundLayer.x + baseBackgroundLayer.width) / 2, (baseBackgroundLayer.y + baseBackgroundLayer.height) / 2, 0, "WELL DONE!", 72);
 					youWon.alignment = FlxTextAlign.CENTER;
 					youWon.x -= youWon.width / 2;
 					youWon.y -= youWon.height /2;
@@ -640,4 +579,42 @@ class PlayState extends FlxState
 		
 	}
 	
+	public function togglePause():Void
+	{
+		if (stageMode == StageMode.PAUSE)
+		{
+			setStageMode(StageMode.PLAY);
+		}
+		else if (stageMode == StageMode.PLAY)
+		{
+			setStageMode(StageMode.PAUSE);
+		}
+	}	
+	
+	public function resetTimescale(?keepValue:Bool = false):Void
+	{
+		var old:Bool = fastForward;
+		setFastForward(false);
+		if (keepValue)
+		{
+			fastForward = old;
+		}
+	}
+	
+	public function onFastForward():Void
+	{
+		setFastForward(!fastForward);
+	}
+	public function setFastForward(value:Bool):Void
+	{
+		fastForward = value;			
+		if (fastForward)
+		{
+			FlxG.timeScale = 2;					
+		}
+		else 
+		{
+			FlxG.timeScale = 1;
+		}
+	}
 }

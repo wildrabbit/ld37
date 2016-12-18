@@ -10,7 +10,7 @@ import org.wildrabbit.roach.PlayState.StageMode;
  * ...
  * @author ith1ldin
  */
-class Goal extends FlxSprite implements Actor
+class Goal extends Actor
 {
 
 	public function new() 
@@ -23,19 +23,19 @@ class Goal extends FlxSprite implements Actor
 		animation.play("idle");
 	}
 	
-	public function pause(value:Bool):Void
+	public override function pause(value:Bool):Void
 	{
 		animation.play(value ? "idle" : "shiny");
 		blend = value ? BlendMode.NORMAL : BlendMode.SCREEN;
 	}
 	
-	public function resetToDefaults()
+	public override function resetToDefaults()
 	{
 		animation.play("idle");
 		blend = BlendMode.NORMAL;		
 	}
 	
-	public function startPlaying():Void
+	public override function startPlaying():Void
 	{
 		animation.play("shiny");
 		blend = BlendMode.SCREEN;

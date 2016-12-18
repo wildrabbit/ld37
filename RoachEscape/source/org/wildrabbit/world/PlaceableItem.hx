@@ -20,7 +20,7 @@ using flixel.util.FlxSpriteUtil;
  * ...
  * @author ith1ldin
  */
-class PlaceableItem extends FlxSprite implements Actor
+class PlaceableItem extends Actor
 {
 	public var parent:PlayState;
 	public var itemData:PlaceableItemData;
@@ -67,16 +67,16 @@ class PlaceableItem extends FlxSprite implements Actor
 	
 	/* INTERFACE org.wildrabbit.world.Actor */
 	
-	public function startPlaying():Void 
+	public override function startPlaying():Void 
 	{
 		animation.play("play");
 	}
 	
-	public function pause(value:Bool):Void 
+	public override function pause(value:Bool):Void 
 	{
 		animation.play(value ? "default" : "play");
 	}
-	public function resetToDefaults():Void 
+	public override function resetToDefaults():Void 
 	{
 		animation.play("default");
 	}

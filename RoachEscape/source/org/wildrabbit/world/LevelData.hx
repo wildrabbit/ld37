@@ -150,16 +150,14 @@ class LevelData extends TiledMap
 			
 			var map:FlxTilemapExt = new FlxTilemapExt();
 			map.loadMapFromArray(tileLayer.tileArray, width, height, fullPath, tileset.tileWidth, tileset.tileHeight, OFF, tileset.firstGID, 1, 1);
-			map.setPosition(0, 0);	
-			map.offset.set(0, 0);
 			
 			if (tileLayer.properties.contains("type") && tileLayer.properties.get("type") == "base")
 			{
-				state.setBgLayer(map);
+				state.addBackgroundLayer(map);
 			}
 			else
 			{
-				state.addTileLayer(map);
+				state.addEdgeLayer(map);
 			}
 			
 		}
