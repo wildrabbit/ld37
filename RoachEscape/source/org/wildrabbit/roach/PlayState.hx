@@ -19,6 +19,7 @@ import flixel.tweens.FlxTween;
 import flixel.ui.FlxButton;
 import flixel.addons.editors.tiled.TiledLayer.TiledLayerType;
 import flixel.util.FlxColor;
+import flixel.util.FlxStringUtil;
 import haxe.ds.Vector;
 import openfl.Assets;
 import org.wildrabbit.ui.HUD;
@@ -143,34 +144,8 @@ class PlayState extends FlxState
 		hud.onStageModeChanged(stageMode);
 		add(hud);
 		
-#if debug
-		
-		back = new FlxButton(5, 5, "prev", function():Void
-		{
-			Reg.level = (Reg.levels.length + Reg.level - 1) % Reg.levels.length;
-			FlxG.switchState(new PlayState());
-		});
-		add(back);
-		
-		next = new FlxButton(80, 5, "next", function():Void 
-		{
-			Reg.level = (Reg.level + 1) % Reg.levels.length;
-			FlxG.switchState(new PlayState());
-		} );
-		add(next);
-		
-		stageTxt = new FlxText(5, 30, 0, "stage: " + stageMode, 14);
-		stageTxt.color = FlxColor.WHITE;
-		add(stageTxt);
-		
-		var toolIdx:String = selectedToolIdx == -1 ? "none" : toolLibrary.get(currentTools[selectedToolIdx].id).name;
-		toolTxt = new FlxText(5, 5, 0, "Tool: " + toolIdx, 14);
-		stageTxt.color = FlxColor.WHITE;
-		add(toolTxt);
-		
-		lvTxt = new FlxText(5, 30, 0, "Level  " + Reg.level, 14);// + " - " + Reg.levels[Reg.level], 14);
-		lvTxt.color = FlxColor.WHITE;
-		add(lvTxt);
+#if debug		
+		createDebugItems();
 #end		
 		goalSound = new FlxSound();
 		goalSound.loadEmbedded(AssetPaths.goal__wav);
@@ -178,6 +153,10 @@ class PlayState extends FlxState
 		
 		fastForward = false;
 		
+		
+		FlxG.watch.add(Reg.stats, "tilesPlaced");
+		FlxG.watch.add(Reg.stats, "tilesTraversed");
+		FlxG.watch.add(Reg.stats, "bumps");
 	}
 	
 	public function buildPlayer(playerData: PlayerData):Void
@@ -263,15 +242,15 @@ class PlayState extends FlxState
 	 */
 	override public function update(dt:Float):Void
 	{
+		var playerMidPos:FlxPoint = player.getRelativeMidPos();
+		var playerCoords:FlxPoint = levelData.getTilePositionFromWorld(Math.round(playerMidPos.x), Math.round(playerMidPos.y));
+		playerMidPos.put();
+		
 		super.update(dt);
 		
 		var pos:FlxPoint = FlxG.mouse.getWorldPosition();			
-		FlxG.log.add(stageMode);
-		FlxG.log.add("mouse: " + pos.x + "," + pos.y);
 		var fits:Bool = pos.x >= baseBackgroundLayer.x && pos.x < baseBackgroundLayer.x + baseBackgroundLayer.width && pos.y >= baseBackgroundLayer.y && pos.y < baseBackgroundLayer.y + baseBackgroundLayer.height;
 		var mouseReleased:Bool = FlxG.mouse.justReleased;
-		FlxG.log.add("pos Inside" + fits);
-		FlxG.log.add("released? " + mouseReleased);
 		if (stageMode == StageMode.EDIT)
 		{
 			if (fits && mouseReleased)
@@ -279,7 +258,6 @@ class PlayState extends FlxState
 				var coords:FlxPoint = null;
 				pos.subtract(baseBackgroundLayer.x, baseBackgroundLayer.y);
 				coords = levelData.getTilePositionFromWorld(Math.round(pos.x), Math.round(pos.y));
-				trace("click! (" + coords.x + "," + coords.y + ")");
 				
 				var tile:TileData = levelData.getTileAt(coords);
 				if (tile.type != TileType.EMPTY)
@@ -307,7 +285,6 @@ class PlayState extends FlxState
 									hud.editPanel.updateTool(i, currentTools[i].amount);
 								}
 							}
-							trace ("Entity #" + entity.itemData.templateID);
 							gameContainer.removePlaceableItem(entity);
 							actors.remove(entity);
 							entity.destroy();							
@@ -320,7 +297,6 @@ class PlayState extends FlxState
 
 					}
 					else {
-						trace ("No entity!");
 						if (selectedToolIdx >= 0 && currentTools[selectedToolIdx].amount > 0)
 						{
 							createNewPlaceableItem(toolLibrary.get(currentTools[selectedToolIdx].id), coords);
@@ -331,12 +307,36 @@ class PlayState extends FlxState
 			}
 			pos.put();
 		}
+		else if (stageMode == StageMode.PLAY && timeToAwake < 0)
+		{			
+			// Check stats:
+			Reg.stats.tilesPlaced = gameContainer.placedItemsLayer.length;
+			Reg.stats.timeSpent += dt; // Beware of the timescale!!
+			FlxG.log.add("Time:" + FlxStringUtil.formatTime(Reg.stats.timeSpent,true));
+			
+			// Check game objectives
+			//....
+			
+			// Check position changes
+			playerMidPos = player.getRelativeMidPos();			
+			var newPlayerCoords = levelData.getTilePositionFromWorld(Math.round(playerMidPos.x), Math.round(playerMidPos.y));
+			var distanceX:Int = Std.int(Math.abs(newPlayerCoords.x - playerCoords.x));
+			var distanceY:Int = Std.int(Math.abs(newPlayerCoords.y - playerCoords.y));
+			if (distanceX != 0 || distanceY != 0)
+			{
+				Reg.stats.tilesTraversed += (distanceX + distanceY); // It shouldn't be higher than 1
+			}
+			playerMidPos.put();
+			newPlayerCoords.put();
+		}
+		playerCoords.put();
 		
 		if (timeToAwake >= 0)
 		{
 			timeToAwake -= dt;
 			if (timeToAwake <= 0)
 			{
+				Reg.stats.reset();
 				playerTrail.resetTrail();
 				gameContainer.addToSpriteLayer(playerTrail, GameContainer.SPRITE_PLAYER_BG_IDX);
 				for (a in actors) { a.startPlaying(); };
@@ -348,7 +348,6 @@ class PlayState extends FlxState
 		var toolIdx:String = selectedToolIdx == -1 ? "none" : toolLibrary.get(currentTools[selectedToolIdx].id).name;
 		toolTxt.text = "Tool: " + toolIdx;
 #end
-		
 	}
 	
 	private function createNewPlaceableItem(toolData:PlaceableItemData, coords:FlxPoint):Void
@@ -374,13 +373,11 @@ class PlayState extends FlxState
 			if (selectedToolIdx == i || tool.amount == 0)
 			{
 				selectedToolIdx = -1;
-				trace("Deselected tool");			
 				remove(select);
 			}
 			else 
 			{
 				selectedToolIdx = i;
-				trace("current tool: " + toolLibrary.get(currentTools[selectedToolIdx].id).templateID);			
 				add(select);
 				var pos:FlxPoint = hud.editPanel.tools[i].getMidpoint();
 				pos.subtract(select.width / 2, select.height / 2);
@@ -486,7 +483,6 @@ class PlayState extends FlxState
 		{
 			goalSound.play();
 		}
-		trace("YOU WON!");
 	}
 	
 	public function onFellDown():Void
@@ -616,5 +612,35 @@ class PlayState extends FlxState
 		{
 			FlxG.timeScale = 1;
 		}
+	}
+	
+	private function createDebugItems():Void
+	{
+		back = new FlxButton(5, 5, "prev", function():Void
+		{
+			Reg.level = (Reg.levels.length + Reg.level - 1) % Reg.levels.length;
+			FlxG.switchState(new PlayState());
+		});
+		add(back);
+		
+		next = new FlxButton(80, 5, "next", function():Void 
+		{
+			Reg.level = (Reg.level + 1) % Reg.levels.length;
+			FlxG.switchState(new PlayState());
+		} );
+		add(next);
+		
+		stageTxt = new FlxText(5, 30, 0, "stage: " + stageMode, 14);
+		stageTxt.color = FlxColor.WHITE;
+		add(stageTxt);
+		
+		var toolIdx:String = selectedToolIdx == -1 ? "none" : toolLibrary.get(currentTools[selectedToolIdx].id).name;
+		toolTxt = new FlxText(5, 5, 0, "Tool: " + toolIdx, 14);
+		stageTxt.color = FlxColor.WHITE;
+		add(toolTxt);
+		
+		lvTxt = new FlxText(5, 30, 0, "Level  " + Reg.level, 14);// + " - " + Reg.levels[Reg.level], 14);
+		lvTxt.color = FlxColor.WHITE;
+		add(lvTxt);
 	}
 }

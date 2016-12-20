@@ -140,28 +140,24 @@ class EditModePanel extends FlxTypedSpriteGroup<FlxSprite>
 	
 	public function onToolClickBtn(i:Int):Void 
 	{
-		trace("clicked button " + i);
 		parent.toggleTool(i);
 		FlxG.sound.play(AssetPaths.select__wav);
 	}
 	
 	public function onPlayButton():Void
 	{
-		trace("start sim");
 		parent.playPressed();
 		FlxG.sound.play(AssetPaths.play__wav);
 	}
 	
 	public function onClearButton(): Void 
 	{
-		trace("clear shit from level");
 		parent.resetPressed();
 		FlxG.sound.play(AssetPaths.select__wav);
 	}
 	
 	public function onMenuButton(): Void 
 	{
-		trace("go to menu");
 		//parent.resetPressed();
 		//FlxG.sound.play(AssetPaths.select__wav);
 	}

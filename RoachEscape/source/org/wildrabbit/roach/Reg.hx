@@ -2,6 +2,7 @@ package org.wildrabbit.roach;
 
 import flixel.util.FlxSave;
 import org.wildrabbit.roach.PlayState.PlaceableItemTool;
+import org.wildrabbit.world.GameStats;
 
 /**
  * Handy, pre-built Registry class that can be used to store
@@ -19,7 +20,8 @@ class Reg
 	/**
 	 * Tools array with the loadouts per level
 	 * Example usage: Storing the levels of a platformer.
-	 */
+	 * TODO: Defer to json (the level itself or wherever we also put the goals
+	 */	
 	public static var levelToolLoadouts:Array<Array<PlaceableItemTool>> = [
 		[
 			{id:0, amount:1 },
@@ -79,4 +81,9 @@ class Reg
 	 * Especially useful for setting up multiple save slots.
 	 */
 	public static var saves:Array<FlxSave> = [];
+	
+	/**
+	 * Stats tracking register
+	 */
+	public static var stats:GameStats = new GameStats();
 }

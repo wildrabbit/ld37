@@ -13,6 +13,7 @@ import flixel.util.FlxSpriteUtil.DrawStyle;
 import flixel.util.FlxSpriteUtil.LineStyle;
 import org.wildrabbit.roach.AssetPaths;
 import org.wildrabbit.roach.PlayState;
+import org.wildrabbit.roach.Reg;
 import org.wildrabbit.world.LevelData.TileData;
 import org.wildrabbit.world.LevelData.TileType;
 
@@ -115,7 +116,6 @@ class Player extends Actor
 				var midCoords:FlxPoint = parent.levelData.getWorldPositionFromTileCoords(midPointCoords);
 				if (goalCoords.equals(midPointCoords) &&  midPos.distanceTo(parent.goal.getMidpoint().subtract(parent.goal.offsetX, parent.goal.offsetY)) < MIDPOINT_DISTANCE_THRESHOLD)
 				{
-					trace("yeah!");
 					parent.onReachedGoal();
 				}
 				else 
@@ -168,6 +168,7 @@ class Player extends Actor
 							setRelativePos(midCoords.x, midCoords.y);						
 							changeFacing(calculateNextFacing());
 							if (!wallSound.playing) { wallSound.play(); }
+							Reg.stats.bumps++;
 							//FlxG.camera.shake(0.0004, 0.1);
 						}	
 					}
@@ -318,5 +319,10 @@ class Player extends Actor
 			}
 		}
 		return 0;
+	}
+	
+	public function getRelativeMidPos():FlxPoint
+	{
+		return getRelativePos().add(PLAYER_WIDTH/2, PLAYER_HEIGHT/2);
 	}
 }
