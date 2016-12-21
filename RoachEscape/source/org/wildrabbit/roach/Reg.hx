@@ -3,6 +3,8 @@ package org.wildrabbit.roach;
 import flixel.util.FlxSave;
 import org.wildrabbit.roach.PlayState.PlaceableItemTool;
 import org.wildrabbit.world.GameStats;
+import org.wildrabbit.world.GameWorldState;
+import org.wildrabbit.data.WorldData;
 
 /**
  * Handy, pre-built Registry class that can be used to store
@@ -11,6 +13,13 @@ import org.wildrabbit.world.GameStats;
  */
 class Reg
 {
+	public static var worlds:Array<Dynamic> = [AssetPaths.world00__json];
+	
+	public static var worldDatabase:Map<Int,WorldData> = new Map<Int,WorldData>();
+
+	/** Persistent state info! */
+	public static var gameWorld: GameWorldState = new GameWorldState();
+	
 	/**
 	 * Generic levels Array that can be used for cross-state stuff.
 	 * Example usage: Storing the levels of a platformer.

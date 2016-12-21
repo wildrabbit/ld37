@@ -14,8 +14,8 @@ import flixel.util.FlxSpriteUtil.LineStyle;
 import org.wildrabbit.roach.AssetPaths;
 import org.wildrabbit.roach.PlayState;
 import org.wildrabbit.roach.Reg;
-import org.wildrabbit.world.LevelData.TileData;
-import org.wildrabbit.world.LevelData.TileType;
+import org.wildrabbit.world.MapData.TileData;
+import org.wildrabbit.world.MapData.TileType;
 
 using flixel.util.FlxSpriteUtil;
 

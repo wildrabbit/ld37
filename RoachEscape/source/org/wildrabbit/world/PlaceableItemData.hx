@@ -1,5 +1,5 @@
 package org.wildrabbit.world;
-import org.wildrabbit.world.LevelData.TileType;
+import org.wildrabbit.world.MapData.TileType;
 
 /**
  * ...

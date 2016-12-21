@@ -26,7 +26,7 @@ import org.wildrabbit.ui.HUD;
 import org.wildrabbit.world.Actor;
 import org.wildrabbit.world.GameContainer;
 import org.wildrabbit.world.Goal;
-import org.wildrabbit.world.LevelData;
+import org.wildrabbit.world.MapData;
 import org.wildrabbit.world.PlaceableItem;
 import org.wildrabbit.world.PlaceableItemData;
 import org.wildrabbit.world.Player;
@@ -62,7 +62,7 @@ class PlayState extends FlxState
 	public static inline var Y_OFFSET:Int = 64;
 	
 	private static inline var AWAKE_DELAY:Float = 0.3;
-	public var levelData:LevelData;
+	public var levelData:MapData;
 	
 	public var gameContainer:GameContainer;
 	
@@ -132,7 +132,7 @@ class PlayState extends FlxState
 		
 		selectedToolIdx = -1;
 
-		levelData = new LevelData(Reg.levels[Reg.level]);
+		levelData = new MapData(Reg.levels[Reg.level]);
 		levelData.build(this);
 		
 		resetToolLoadout();

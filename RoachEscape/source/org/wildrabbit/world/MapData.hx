@@ -40,7 +40,7 @@ enum TileType
  * ...
  * @author ith1ldin
  */
-class LevelData extends TiledMap
+class MapData extends TiledMap
 {
 	private static var DATA_PATH:String = "assets/data/";
 	private static var IMG_PATH:String = "assets/images/";

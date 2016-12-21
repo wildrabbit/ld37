@@ -8,6 +8,9 @@ import flash.Lib;
 import flixel.FlxG;
 import flixel.FlxGame;
 import flixel.FlxState;
+import haxe.Json;
+import openfl.Assets;
+import org.wildrabbit.data.WorldData;
 
 class Main extends Sprite 
 {
@@ -63,6 +66,18 @@ class Main extends Sprite
 			gameWidth = Math.ceil(stageWidth / zoom);
 			gameHeight = Math.ceil(stageHeight / zoom);
 		}
+		
+		// Load database
+		Reg.worldDatabase = new Map<Int, WorldData>();
+		for (mapFile in Reg.worlds)
+		{
+			var wObject:Dynamic = Json.parse(Assets.getText(mapFile));
+			var w:WorldData = new WorldData(wObject);
+			Reg.worldDatabase[w.id] = w;
+		}
+		
+		
+		// Initialise state
 
 		Reg.level = 0;
 		addChild(new FlxGame(gameWidth, gameHeight, initialState, zoom, framerate, framerate, skipSplash, startFullscreen));
