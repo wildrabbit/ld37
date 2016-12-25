@@ -31,9 +31,9 @@ class ObjectiveData
 		"Complete in less than #IPARAM0# bumps",
 		"Complete in less in less than #TPARAM0# mins",
 		"Complete traversing less than #IPARAM0# tiles",
-		"Complete picking all the #SPARAM0",
-		"Complete picking at least #IPARAM0 #SPARAM0",
-		"Complete picking #SPARAM0 in order"		
+		"Complete picking all the #SPARAM0#",
+		"Complete picking at least #IPARAM0# #SPARAM0#",
+		"Complete picking #SPARAM0# in order"		
 	];
 	
 	public var type:ObjectiveType;
@@ -67,7 +67,7 @@ class ObjectiveData
 		}
 		else if (type == ObjectiveType.MAX_TIME)
 		{
-			StringTools.replace(str,"#TPARAM0", FlxStringUtil.formatTime(value, false));
+			StringTools.replace(str,"#TPARAM0#", FlxStringUtil.formatTime(value, false));
 		}
 		else if (type == ObjectiveType.ALL_COLLECTABLES_PICKED)
 		{
@@ -81,6 +81,6 @@ class ObjectiveData
 		{
 			return str; // TODO
 		}
-		return StringTools.replace(str, "#IPARAM0", Std.string(value));
+		return StringTools.replace(str, "#IPARAM0#", Std.string(value));
 	}
 }

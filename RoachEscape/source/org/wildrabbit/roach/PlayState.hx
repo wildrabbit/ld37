@@ -132,7 +132,7 @@ class PlayState extends FlxState
 		
 		selectedToolIdx = -1;
 
-		levelData = new MapData(Reg.levels[Reg.level]);
+		levelData = new MapData("assets/data/"+Reg.currentLevel.file);
 		levelData.build(this);
 		
 		resetToolLoadout();
@@ -274,12 +274,12 @@ class PlayState extends FlxState
 						var willReplace:Bool = existsOther && tile.type == selectedToolData.allowedTileType;
 						var removeScheduled:Bool = !existsOther || (existsOther && tile.type == selectedToolData.allowedTileType);
 						
-						if (removeScheduled)
+							if (removeScheduled)
 						{
 							var templateID:Int = entityData.templateID;
 							for (i in 0...currentTools.length)
 							{
-								if (currentTools[i].id == templateID && currentTools[i].amount < Reg.levelToolLoadouts[Reg.level][i].amount)
+								if (currentTools[i].id == templateID && currentTools[i].amount < Reg.currentLevel.loadouts[i].amount)
 								{
 									currentTools[i].amount++;
 									hud.editPanel.updateTool(i, currentTools[i].amount);
@@ -401,7 +401,7 @@ class PlayState extends FlxState
 	private function resetToolLoadout():Void
 	{		
 		currentTools.splice(0, currentTools.length);
-		var levelLoadout:Array<PlaceableItemTool> = Reg.levelToolLoadouts[Reg.level];
+		var levelLoadout:Array<PlaceableItemTool> = Reg.currentLevel.loadouts;
 		for (i in 0...levelLoadout.length)
 		{					
 			currentTools.push( { id: levelLoadout[i].id, amount:levelLoadout[i].amount } );
@@ -477,6 +477,9 @@ class PlayState extends FlxState
 	public function onReachedGoal():Void
 	{
 		result = Result.WON;
+		
+		// Evaluate objectives. Notify UI. Etc
+		
 		setStageMode(StageMode.OVER);
 		
 		if (!goalSound.playing)
@@ -514,7 +517,7 @@ class PlayState extends FlxState
 					for (a in actors) { a.resetToDefaults();}
 					resetTimescale(); // We should never need to check this
 					timeToAwake = AWAKE_DELAY;
-					selectedToolIdx = -1;
+					selectedToolIdx = -1; 
 					selectedPlaceable = null;					
 				}
 				else
@@ -559,13 +562,24 @@ class PlayState extends FlxState
 	
 	public function onNextLevel(t:FlxTween):Void
 	{
-		if (Reg.level >= Reg.levels.length - 1)
+		if (Reg.gameWorld.currentLevelIdx >= Reg.currentWorld.levels.length - 1)
 		{
-			FlxG.switchState(new EndState());
+			if (Reg.gameWorld.currentWorldIdx >= Reg.worlds.length - 1)
+			{
+				FlxG.switchState(new EndState());				
+			}
+			else 
+			{
+				Reg.gameWorld.currentWorldIdx++;
+				Reg.gameWorld.currentLevelIdx = 0;
+				Reg.currentWorld = Reg.worldDatabase[Reg.gameWorld.currentWorldIdx];
+				Reg.currentLevel = Reg.currentWorld.levels[Reg.gameWorld.currentLevelIdx];
+			}
 		}
 		else 
 		{
-			Reg.level++;
+			Reg.gameWorld.currentLevelIdx++;
+			Reg.currentLevel = Reg.currentWorld.levels[Reg.gameWorld.currentLevelIdx];
 		}
 		FlxTween.num(0, 100, 1, { onComplete: function(t:FlxTween):Void { FlxG.switchState(new PlayState()); }} );
 	}
@@ -616,16 +630,19 @@ class PlayState extends FlxState
 	
 	private function createDebugItems():Void
 	{
+		// Add buttons to move across maps
 		back = new FlxButton(5, 5, "prev", function():Void
 		{
-			Reg.level = (Reg.levels.length + Reg.level - 1) % Reg.levels.length;
+			Reg.gameWorld.currentLevelIdx = Reg.currentWorld.levels.length + (Reg.gameWorld.currentLevelIdx - 1) % Reg.currentWorld.levels.length;
+			Reg.currentLevel = Reg.currentWorld.levels[Reg.gameWorld.currentLevelIdx];
 			FlxG.switchState(new PlayState());
 		});
 		add(back);
 		
 		next = new FlxButton(80, 5, "next", function():Void 
 		{
-			Reg.level = (Reg.level + 1) % Reg.levels.length;
+			Reg.gameWorld.currentLevelIdx = (Reg.gameWorld.currentLevelIdx + 1) % Reg.currentWorld.levels.length;
+			Reg.currentLevel = Reg.currentWorld.levels[Reg.gameWorld.currentLevelIdx];
 			FlxG.switchState(new PlayState());
 		} );
 		add(next);
@@ -639,7 +656,7 @@ class PlayState extends FlxState
 		stageTxt.color = FlxColor.WHITE;
 		add(toolTxt);
 		
-		lvTxt = new FlxText(5, 30, 0, "Level  " + Reg.level, 14);// + " - " + Reg.levels[Reg.level], 14);
+		lvTxt = new FlxText(5, 30, 0, "Level  " + Reg.gameWorld.currentLevelIdx, 14);// + " - " + Reg.levels[Reg.level], 14);
 		lvTxt.color = FlxColor.WHITE;
 		add(lvTxt);
 	}

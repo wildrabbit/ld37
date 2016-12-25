@@ -5,6 +5,7 @@ import org.wildrabbit.roach.PlayState.PlaceableItemTool;
 import org.wildrabbit.world.GameStats;
 import org.wildrabbit.world.GameWorldState;
 import org.wildrabbit.data.WorldData;
+import org.wildrabbit.world.MapData;
 
 /**
  * Handy, pre-built Registry class that can be used to store
@@ -20,61 +21,64 @@ class Reg
 	/** Persistent state info! */
 	public static var gameWorld: GameWorldState = new GameWorldState();
 	
-	/**
-	 * Generic levels Array that can be used for cross-state stuff.
-	 * Example usage: Storing the levels of a platformer.
-	 */
-	public static var levels:Array<Dynamic> = [AssetPaths.level0__tmx, AssetPaths.level1__tmx, AssetPaths.level2__tmx, AssetPaths.level3__tmx, AssetPaths.level4__tmx, AssetPaths.level5__tmx];
+	///**
+	 //* Generic levels Array that can be used for cross-state stuff.
+	 //* Example usage: Storing the levels of a platformer.
+	 //*/
+	//public static var levels:Array<Dynamic> = [AssetPaths.level0__tmx, AssetPaths.level1__tmx, AssetPaths.level2__tmx, AssetPaths.level3__tmx, AssetPaths.level4__tmx, AssetPaths.level5__tmx];
+	//
+	///**
+	 //* Tools array with the loadouts per level
+	 //* Example usage: Storing the levels of a platformer.
+	 //* TODO: Defer to json (the level itself or wherever we also put the goals
+	 //*/	
+	//public static var levelToolLoadouts:Array<Array<PlaceableItemTool>> = [
+		//[
+			//{id:0, amount:1 },
+			//{id:1, amount:1 }
+		//], 		
+		//[
+			//{id:0, amount:1 },
+			//{id:1, amount:1 },
+			//{id:2, amount:1 },
+			//{id:3, amount:1 }
+		//], 				
+		//[
+			//{id:0, amount:2 },
+			//{id:1, amount:2 },
+			//{id:2, amount:2 },
+			//{id:3, amount:2 }
+		//], 				
+		//[
+			//{id:0, amount:2 },
+			//{id:1, amount:2 },
+			//{id:2, amount:2 },
+			//{id:3, amount:2 }
+		//]
+		//, 				
+		//[
+			//{id:0, amount:2 },
+			//{id:1, amount:2 },
+			//{id:2, amount:2 },
+			//{id:3, amount:2 }
+		//]
+		//, 				
+		//[
+			//{id:0, amount:2 },
+			//{id:1, amount:2 },
+			//{id:2, amount:2 },
+			//{id:3, amount:2 }
+		//]		
+	//];
 	
 	/**
-	 * Tools array with the loadouts per level
-	 * Example usage: Storing the levels of a platformer.
-	 * TODO: Defer to json (the level itself or wherever we also put the goals
-	 */	
-	public static var levelToolLoadouts:Array<Array<PlaceableItemTool>> = [
-		[
-			{id:0, amount:1 },
-			{id:1, amount:1 }
-		], 		
-		[
-			{id:0, amount:1 },
-			{id:1, amount:1 },
-			{id:2, amount:1 },
-			{id:3, amount:1 }
-		], 				
-		[
-			{id:0, amount:2 },
-			{id:1, amount:2 },
-			{id:2, amount:2 },
-			{id:3, amount:2 }
-		], 				
-		[
-			{id:0, amount:2 },
-			{id:1, amount:2 },
-			{id:2, amount:2 },
-			{id:3, amount:2 }
-		]
-		, 				
-		[
-			{id:0, amount:2 },
-			{id:1, amount:2 },
-			{id:2, amount:2 },
-			{id:3, amount:2 }
-		]
-		, 				
-		[
-			{id:0, amount:2 },
-			{id:1, amount:2 },
-			{id:2, amount:2 },
-			{id:3, amount:2 }
-		]		
-	];
-	
-	/**
-	 * Generic level variable that can be used for cross-state stuff.
-	 * Example usage: Storing the current level number.
+	 * Ref. to the current level data
 	 */
-	public static var level:Int = 0;
+	public static var currentLevel:LevelData = null;
+	/**
+	 * Ref to the current world 
+	 */
+	public static var currentWorld:WorldData = null;
 	/**
 	 * Generic scores Array that can be used for cross-state stuff.
 	 * Example usage: Storing the scores for level.

@@ -78,8 +78,11 @@ class Main extends Sprite
 		
 		
 		// Initialise state
+		Reg.gameWorld.currentWorldIdx = 0;
+		Reg.gameWorld.currentLevelIdx = 0;
+		Reg.currentWorld = Reg.worldDatabase[Reg.gameWorld.currentWorldIdx];
+		Reg.currentLevel = Reg.currentWorld.levels[Reg.gameWorld.currentLevelIdx];
 
-		Reg.level = 0;
 		addChild(new FlxGame(gameWidth, gameHeight, initialState, zoom, framerate, framerate, skipSplash, startFullscreen));
 		FlxG.log.redirectTraces = true;
 	}

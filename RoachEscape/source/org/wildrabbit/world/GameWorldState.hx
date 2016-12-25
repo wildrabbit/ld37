@@ -25,9 +25,9 @@ class WorldStateEntry
 }
 class GameWorldState
 {
-	private var currentWorldIdx:Int;
-	private var currentLevelIdx:Int;
-	private var worldTable:Map<Int,WorldStateEntry>; // LEVELID => Obj
+	public var currentWorldIdx:Int;
+	public var currentLevelIdx:Int;
+	public var worldTable:Map<Int,WorldStateEntry>; // LEVELID => Obj
 	public var totalStars (default, null):Int; // Calculated field!	
 	
 	public function new(){}

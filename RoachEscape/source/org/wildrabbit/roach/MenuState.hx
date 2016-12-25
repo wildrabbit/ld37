@@ -56,7 +56,9 @@ class MenuState extends FlxState
 			if (FlxG.keys.justPressed.ANY|| FlxG.mouse.justPressed)
 			{
 				t.cancel();
-				Reg.level = 0;
+				Reg.gameWorld.currentWorldIdx = Reg.gameWorld.currentLevelIdx = 0;
+				Reg.currentWorld = Reg.worldDatabase[Reg.gameWorld.currentWorldIdx];
+				Reg.currentLevel = Reg.currentWorld.levels[Reg.gameWorld.currentLevelIdx];
 				FlxG.switchState(new PlayState());
 				FlxG.sound.play(AssetPaths.play__wav);
 			}

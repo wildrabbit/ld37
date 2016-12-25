@@ -52,7 +52,8 @@ class WorldData
 		file = Reflect.hasField(obj, "file") ? obj.file : "";
 		for (l in Reflect.fields(obj.levels))
 		{
-			var l:LevelData = new LevelData(Reflect.field(obj.levels,l));
+			var l:LevelData = new LevelData(Reflect.field(obj.levels, l));
+			levels.push(l);
 		}
 	}
 }

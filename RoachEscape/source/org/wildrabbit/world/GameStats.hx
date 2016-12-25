@@ -4,6 +4,14 @@ package org.wildrabbit.world;
  * ...
  * @author ith1ldin
  */
+enum StatType
+{
+	TILES_TRAVERSED;
+	TILES_PLACED;
+	TIME_SPENT;
+	BREADCUMBS;
+	//BUMP_COUNT;
+}
 class GameStats
 {
 	public var tilesTraversed:Int;
