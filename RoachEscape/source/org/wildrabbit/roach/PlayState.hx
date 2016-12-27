@@ -633,7 +633,7 @@ class PlayState extends FlxState
 		// Add buttons to move across maps
 		back = new FlxButton(5, 5, "prev", function():Void
 		{
-			Reg.gameWorld.currentLevelIdx = Reg.currentWorld.levels.length + (Reg.gameWorld.currentLevelIdx - 1) % Reg.currentWorld.levels.length;
+			Reg.gameWorld.currentLevelIdx = (Reg.currentWorld.levels.length + Reg.gameWorld.currentLevelIdx - 1) % Reg.currentWorld.levels.length;
 			Reg.currentLevel = Reg.currentWorld.levels[Reg.gameWorld.currentLevelIdx];
 			FlxG.switchState(new PlayState());
 		});

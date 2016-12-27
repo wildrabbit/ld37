@@ -7,6 +7,7 @@ class ObjectiveState
 {
 	public var completed:Bool;
 	public var bestValue: Int;
+	public var bestFloat:Float;
 	public var bestSequence: Array<Int> = new Array<Int>();
 	public function new(){}
 }

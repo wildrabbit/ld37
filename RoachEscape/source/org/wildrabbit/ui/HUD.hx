@@ -1,8 +1,11 @@
 package org.wildrabbit.ui;
 
+import flash.display3D.textures.TextureBase;
 import flixel.FlxG;
 import flixel.FlxSprite;
+import flixel.group.FlxSpriteGroup;
 import flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup;
+import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.system.FlxAssets.FlxGraphicAsset;
 import flixel.text.FlxText;
@@ -28,6 +31,9 @@ class HUD extends FlxTypedSpriteGroup<FlxSprite>
 
 	public var editPanel: EditModePanel;
 	public var playPanel: PlayModePanel;
+	
+	public var playDeco: FlxSpriteGroup;
+	public var editDeco: FlxSpriteGroup;
 	
 	//private var playButton:FlxButton;
 	//private var resetButton:FlxButton;	
@@ -56,7 +62,8 @@ class HUD extends FlxTypedSpriteGroup<FlxSprite>
 
 		this.parent = parent;
 		
-		gameModeTitle = new FlxText(384 - 150, 0, 0, EDIT_TEXT, 36);
+		gameModeTitle = new FlxText(384 - 192, 0, 384, EDIT_TEXT, 48);
+		gameModeTitle.alignment = FlxTextAlign.CENTER;
 		add(gameModeTitle);
 		
 		editPanel = new EditModePanel(parent);
@@ -64,6 +71,14 @@ class HUD extends FlxTypedSpriteGroup<FlxSprite>
 		
 		playPanel = new PlayModePanel(parent);
 		add(playPanel);
+		
+		playDeco = new FlxSpriteGroup();
+		buildPlayDeco();
+		add(playDeco);
+		
+		editDeco = new FlxSpriteGroup();
+		buildEditDeco();
+		add(editDeco);
 	}
 	
 	public function onStageModeChanged(stageMode:StageMode)
@@ -75,7 +90,9 @@ class HUD extends FlxTypedSpriteGroup<FlxSprite>
 			{				
 				gameModeTitle.text = EDIT_TEXT;
 				editPanel.goToEdit();
-				playPanel.goToEdit();				
+				editDeco.visible = true;
+				playPanel.goToEdit();	
+				playDeco.visible = false;
 			}
 			case StageMode.OVER:
 			{
@@ -108,10 +125,52 @@ class HUD extends FlxTypedSpriteGroup<FlxSprite>
 				// hide pause panel
 				
 				// show decoration
+				editDeco.visible = false;
+				playDeco.visible = true;
 				
 				editPanel.goToPlay();
 				playPanel.goToPlay();
 			}
 		}
+	}
+	
+	private function buildEditDeco():Void
+	{
+		var top:FlxSprite = new FlxSprite(16, 28, AssetPaths.deco_construction_top__png);
+		editDeco.add(top);
+		
+		var bot:FlxSprite = new FlxSprite(61, 731, AssetPaths.deco_construction_bottom__png);
+		editDeco.add(bot);
+		
+		var left:FlxSprite = new FlxSprite(16, 37, AssetPaths.deco_construction_left__png);
+		editDeco.add(left);
+		
+		var right:FlxSprite = new FlxSprite(732, 38, AssetPaths.deco_construction_right__png);
+		editDeco.add(right);
+	}
+	
+	private function buildPlayDeco():Void
+	{
+		var small1:FlxSprite = new FlxSprite(22, 16, AssetPaths.deco_yellow_small_right__png);
+		playDeco.add(small1);
+		
+		var small2:FlxSprite = new FlxSprite(614, 16, AssetPaths.deco_yellow_small_right__png);
+		playDeco.add(small2);
+		
+		var large:FlxSprite = new FlxSprite(22, 726, AssetPaths.deco_yellow_full_h__png);
+		playDeco.add(large);
+		
+		var up:FlxSprite = new FlxSprite(0, 0, AssetPaths.deco_yellow_full_v__png);
+		up.origin.set(0,0);
+		up.angle = -90;
+		up.setPosition(22, 696);
+		playDeco.add(up);
+		
+		var down:FlxSprite = new FlxSprite(0, 0, AssetPaths.deco_yellow_full_v__png);
+		down.origin.set(0, down.height);
+		down.angle = 90;
+		down.x = 727;
+		down.y = 48;
+		playDeco.add(down);
 	}
 }
