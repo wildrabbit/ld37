@@ -13,6 +13,7 @@ import org.wildrabbit.roach.AssetPaths;
 import org.wildrabbit.roach.PlayState;
 import org.wildrabbit.roach.Reg;
 import org.wildrabbit.world.GameStats.StatType;
+import org.wildrabbit.world.GameWorldState.ObjectiveState;
 import org.wildrabbit.world.PlaceableItemData;
 
 import org.wildrabbit.ui.Orientation;
@@ -136,9 +137,12 @@ class PlayModePanel extends FlxTypedSpriteGroup<FlxSprite>
 		var height:Float = 36;
 		var medalIdx:Int = 0;
 		var offset:Float = 60;
+		var objStateList:Array<ObjectiveState> = Reg.gameWorld.worldTable[Reg.gameWorld.currentWorldIdx].levelObjectiveTable[Reg.gameWorld.currentLevelIdx].objectives;
 		for (objectiveData in objRef)
 		{
-			var obj:ObjectivePanel = new ObjectivePanel(5, offset, atlas, medalIdx, objectiveData.getText(), false, false);
+			var objState:ObjectiveState = objStateList[medalIdx];
+			var revealed:Bool = medalIdx < 2 || objStateList[1].completed;
+			var obj:ObjectivePanel = new ObjectivePanel(5, offset, atlas, medalIdx, objectiveData.getText(), revealed, objState.completed);
 			add(obj);	
 			medalIdx++;
 			offset += height;
@@ -245,5 +249,10 @@ class PlayModePanel extends FlxTypedSpriteGroup<FlxSprite>
 		button1.updateBehaviour(AssetPaths.play__png, onPauseToggle);
 		button2.updateBehaviour(AssetPaths.menu__png, onMenu);
 		button3.updateBehaviour(AssetPaths.build__png, onEdit);
+	}
+	
+	public function updateObjective(idx:Int, completed:Bool):Void
+	{
+		goals[idx].setCompleted(completed);
 	}
 }

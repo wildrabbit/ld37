@@ -21,6 +21,8 @@ class ObjectivePanel extends FlxSpriteGroup
 	private var tickBox:FlxSprite = null;
 	private var tick:FlxSprite = null;
 	
+	private var objMessage:String = "";
+	
 	public function new(x:Float, y:Float, atlas: FlxAtlasFrames, medalType:Int, objText:String, completed:Bool, revealed:Bool = false) 
 	{
 		super(x, y);
@@ -30,7 +32,8 @@ class ObjectivePanel extends FlxSpriteGroup
 		medal.animation.frameName = MEDALS[medalType];
 		add(medal);
 		
-		description = new FlxText(medal.width + 4, 0, TEXT_WIDTH, objText, 16);
+		objMessage = objText;
+		description = new FlxText(medal.width + 4, 0, TEXT_WIDTH, revealed? objText : "??????", 16);
 		description.font = AssetPaths.small_text__TTF;
 		description.wordWrap = true;
 		add(description);
@@ -54,10 +57,11 @@ class ObjectivePanel extends FlxSpriteGroup
 		tick.visible = value;
 	}
 	
-	public function setRevealed(value:Bool, completed:Bool = false):Void
-	{
-		tickBox.visible = value;
-		tick.visible = value && completed;
+	public function setRevealed(revealed:Bool, completed:Bool = false):Void
+	{		
+		description = new FlxText(medal.width + 4, 0, TEXT_WIDTH, revealed? objMessage : "??????", 16);
+		tickBox.visible = revealed;
+		tick.visible = revealed && completed;
 	}
 	
 }

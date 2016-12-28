@@ -22,9 +22,14 @@ import flixel.util.FlxColor;
 import flixel.util.FlxStringUtil;
 import haxe.ds.Vector;
 import openfl.Assets;
+import org.wildrabbit.data.ObjectiveData;
+import org.wildrabbit.data.WorldData.LevelData;
 import org.wildrabbit.ui.HUD;
 import org.wildrabbit.world.Actor;
 import org.wildrabbit.world.GameContainer;
+import org.wildrabbit.world.GameWorldState.LevelState;
+import org.wildrabbit.world.GameWorldState.ObjectiveState;
+import org.wildrabbit.world.GameWorldState.WorldStateEntry;
 import org.wildrabbit.world.Goal;
 import org.wildrabbit.world.MapData;
 import org.wildrabbit.world.PlaceableItem;
@@ -134,6 +139,28 @@ class PlayState extends FlxState
 
 		levelData = new MapData("assets/data/"+Reg.currentLevel.file);
 		levelData.build(this);
+		
+		if (!Reg.gameWorld.worldTable.exists(Reg.gameWorld.currentWorldIdx))
+		{
+			Reg.gameWorld.worldTable[Reg.gameWorld.currentWorldIdx] = new WorldStateEntry();
+			Reg.gameWorld.worldTable[Reg.gameWorld.currentWorldIdx].levelObjectiveTable = new Map<Int,LevelState>();
+		}
+		
+		if (!Reg.gameWorld.worldTable[Reg.gameWorld.currentWorldIdx].levelObjectiveTable.exists(Reg.gameWorld.currentLevelIdx))
+		{
+			var data:LevelData = Reg.worldDatabase[Reg.gameWorld.currentWorldIdx].levels[Reg.gameWorld.currentLevelIdx];
+			var levelState = new LevelState();
+			for (objData in data.objectives)
+			{
+				var objState:ObjectiveState = new ObjectiveState();
+				objState.completed = false;
+				objState.bestValue = 0;
+				objState.bestFloat = 0.0;
+				objState.bestSequence.splice(0,objState.bestSequence.length - 1);
+				levelState.objectives.push(objState);
+			}
+			Reg.gameWorld.worldTable[Reg.gameWorld.currentWorldIdx].levelObjectiveTable[Reg.gameWorld.currentLevelIdx] = levelState;
+		}
 		
 		resetToolLoadout();
 		
@@ -546,6 +573,80 @@ class PlayState extends FlxState
 					
 				if (result == Result.WON)
 				{
+					// Evaluate objectives:
+					var worldTable: WorldStateEntry = Reg.gameWorld.worldTable[Reg.gameWorld.currentWorldIdx];
+					var levelState: LevelState = worldTable.levelObjectiveTable[Reg.gameWorld.currentLevelIdx];
+					
+					var objectives:Array<ObjectiveData> = Reg.currentLevel.objectives;
+					var idx:Int = 0;
+					for (objective in objectives)
+					{
+						var loadoutData:Array<PlaceableItemTool> = Reg.worldDatabase[Reg.gameWorld.currentWorldIdx].levels[Reg.gameWorld.currentLevelIdx].loadouts;
+						var loadoutTotal:Int = 0;
+						for (tool in  loadoutData)
+						{
+							loadoutTotal += tool.amount;
+						}
+						var objectiveState:ObjectiveState = levelState.objectives[idx];
+						var complete:Bool = false;
+						var bestInt:Int = objectiveState.bestValue;
+						var bestFloat:Float = objectiveState.bestFloat;
+						var bestSequence:Array<Int> = objectiveState.bestSequence.copy();
+						
+						switch(objective.type)
+						{
+							case ObjectiveType.ALL_TILES_PLACED: 
+							{ 
+								complete = (Reg.stats.tilesPlaced == loadoutTotal);
+								if (complete)
+									bestInt = Math.round(Math.max(Reg.stats.tilesPlaced, bestInt));
+							}	
+							case ObjectiveType.MAX_BUMPS: 
+							{ 
+								complete = (Reg.stats.bumps <= objective.value); 
+								if (complete)
+									bestInt = (!objectiveState.completed) ? Reg.stats.bumps : Math.round(Math.min(Reg.stats.bumps, bestInt));							
+							}	
+							case ObjectiveType.MAX_TILES_PLACED: 
+							{
+								complete = (Reg.stats.tilesPlaced <= objective.value); 
+								if (complete)
+									bestInt = (!objectiveState.completed) ? Reg.stats.tilesPlaced : Math.round(Math.min(Reg.stats.tilesPlaced, bestInt));							
+							}	
+							case ObjectiveType.MAX_TIME: 
+							{
+								complete = (Reg.stats.timeSpent <= objective.value);
+								if (complete)
+									bestFloat = (!objectiveState.completed) ? Reg.stats.timeSpent: Math.min(Reg.stats.timeSpent, bestFloat);							
+							}	
+							case ObjectiveType.MIN_TILES_TRAVERSED: 
+							{
+								complete = (Reg.stats.tilesPlaced >= objective.value); 
+								if (complete)
+									bestInt = (!objectiveState.completed) ? Reg.stats.tilesPlaced : Math.round(Math.max(Reg.stats.tilesPlaced, bestInt));
+							}
+							case ObjectiveType.REACH_GOAL:
+							{
+								complete = true;
+							}	
+							case ObjectiveType.ALL_COLLECTABLES_PICKED: { }
+							case ObjectiveType.COMPLETE_SEQUENCE: { }	
+							case ObjectiveType.MIN_COLLECTABLES_PICKED: { }	
+						}
+
+						if (!objectiveState.completed && complete)
+						{
+							objectiveState.completed = true;
+							hud.playPanel.updateObjective(idx, complete);
+						}
+						objectiveState.bestValue = bestInt;
+						objectiveState.bestFloat = bestFloat;
+						objectiveState.bestSequence.splice(0, objectiveState.bestSequence.length - 1);
+						objectiveState.bestSequence = bestSequence.copy();
+						idx++;
+					}
+					
+					// Show results
 					var youWon:FlxText = new FlxText((baseBackgroundLayer.x + baseBackgroundLayer.width) / 2, (baseBackgroundLayer.y + baseBackgroundLayer.height) / 2, 0, "WELL DONE!", 72);
 					youWon.alignment = FlxTextAlign.CENTER;
 					youWon.x -= youWon.width / 2;
@@ -554,6 +655,8 @@ class PlayState extends FlxState
 					youWon.scale.set(0.25, 0.25);
 					var t:FlxTween = FlxTween.tween(youWon.scale, { "x": 1.25, "y":1.25 }, 0.35, { type:FlxTween.ONESHOT, ease:FlxEase.backOut, onComplete:onNextLevel } );
 				}
+				
+				Reg.gameWorld.save();
 			}
 		}
 		stageMode = newMode;
