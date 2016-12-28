@@ -64,14 +64,17 @@ class PlayModePanel extends FlxTypedSpriteGroup<FlxSprite>
 	
 	private var atlas: FlxAtlasFrames;
 	
+	private static inline var GOALS_TEXT:String = "GOALS";
+	private static inline var STATS_TEXT:String = "STATS";
+	
 	private var orientations: Array<PlayOrientationData> = [
 	{
 		titleRect: FlxRect.get(0, 0, 0, 0),
 		specialTitleRect: FlxRect.get(0,350,0,0),
 		statsRect: FlxRect.get(0,0,0,0),
-		pauseRect: FlxRect.get(12,583,168,56),
-		ffRect: FlxRect.get(12, 656, 168, 56),
-		editRect: FlxRect.get(12, 720, 168, 56),
+		pauseRect: FlxRect.get(36,574,168,56),
+		ffRect: FlxRect.get(36, 638, 168, 56),
+		editRect: FlxRect.get(36, 702, 168, 56),
 		baseX: 12,
 		baseY: 91,
 		buttonWidth: 72,
@@ -86,9 +89,9 @@ class PlayModePanel extends FlxTypedSpriteGroup<FlxSprite>
 		titleRect: FlxRect.get(0, 0, 0, 0),
 		specialTitleRect: FlxRect.get(0,0,0,0),
 		statsRect: FlxRect.get(0,0,0,0),
-		pauseRect: FlxRect.get(12,583,168,56),
-		ffRect: FlxRect.get(12, 656, 168, 56),
-		editRect: FlxRect.get(12, 720, 168, 56),
+		pauseRect: FlxRect.get(36,574,168,56),
+		ffRect: FlxRect.get(36, 638, 168, 56),
+		editRect: FlxRect.get(36, 702, 168, 56),
 		baseX: 12,
 		baseY: 91,
 		buttonWidth: 72,
@@ -105,13 +108,15 @@ class PlayModePanel extends FlxTypedSpriteGroup<FlxSprite>
 	
 	public function new(parent:PlayState) 
 	{
-		super(800, 0);
+		super(768, 0);
 		this.parent = parent;
 
 		atlas = FlxAtlasFrames.fromTexturePackerJson(AssetPaths.ui__png, AssetPaths.ui__json);
 		var config:PlayOrientationData = orientations[Type.enumIndex(currentOrientation)];
 
-		panelTitle = new FlxText(config.titleRect.x, config.titleRect.y, 0, "GOALS", 32);
+		panelTitle = new FlxText(config.titleRect.x, config.titleRect.y, 256, "", 32);
+		panelTitle.alignment = FlxTextAlign.CENTER;
+		panelTitle.text = GOALS_TEXT;
 		add(panelTitle);
 
 		initGoalsPanel();
@@ -153,8 +158,9 @@ class PlayModePanel extends FlxTypedSpriteGroup<FlxSprite>
 	private function initStatsPanel():Void
 	{
 		var config:PlayOrientationData = orientations[Type.enumIndex(currentOrientation)];
-		specialTitle = new FlxText(config.specialTitleRect.x, config.specialTitleRect.y, 200, "STATS", 32);
+		specialTitle = new FlxText(config.specialTitleRect.x, config.specialTitleRect.y, 256, "", 32);
 		specialTitle.alignment = FlxTextAlign.CENTER;
+		specialTitle.text = STATS_TEXT;
 		add(specialTitle);
 		var offset:Float = 400;
 		var height:Float = 36;

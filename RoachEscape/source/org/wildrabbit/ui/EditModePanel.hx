@@ -55,10 +55,10 @@ class EditModePanel extends FlxTypedSpriteGroup<FlxSprite>
 		{
 			toolsRect: FlxRect.get(0, 0, 0, 0),
 			toolsVertical: false,
-			playRect: FlxRect.get(12,583,168,56),
-			clearRect: FlxRect.get(12, 656, 168, 56),
-			menuRect: FlxRect.get(12, 720, 168, 56),
-			baseX: 12,
+			playRect: FlxRect.get(36,574,168,56),
+			clearRect: FlxRect.get(36, 638, 168, 56),
+			menuRect: FlxRect.get(36, 702, 168, 56),
+			baseX: 32,
 			baseY: 91,
 			buttonWidth: 72,
 			buttonHeight: 96,
@@ -71,10 +71,10 @@ class EditModePanel extends FlxTypedSpriteGroup<FlxSprite>
 		{
 			toolsRect: FlxRect.get(0, 0, 0, 0),
 			toolsVertical: true,
-			playRect: FlxRect.get(12,583,168,56),
-			clearRect: FlxRect.get(12, 656, 168, 56),
-			menuRect: FlxRect.get(12, 720, 168, 56),
-			baseX: 12,
+			playRect: FlxRect.get(36,574,168,56),
+			clearRect: FlxRect.get(36, 638, 168, 56),
+			menuRect: FlxRect.get(36, 702, 168, 56),
+			baseX:32,
 			baseY: 91,
 			buttonWidth: 72,
 			buttonHeight: 96,
@@ -91,15 +91,17 @@ class EditModePanel extends FlxTypedSpriteGroup<FlxSprite>
 
 	public function new(parent:PlayState) 
 	{
-		super(800, 0, 0);
+		super(768, 0, 0);
 		this.parent = parent;
 		
 		
 		var config:EditOrientationData = orientations[Type.enumIndex(currentOrientation)];
 
-		if (currentOrientation == Orientation.LANDSCAPE)
+		if (!config.toolsVertical)
 		{
-			toolsText = new FlxText(config.toolsRect.x, config.toolsRect.y, 0, TOOLS_TEXT, 30);
+			toolsText = new FlxText(config.toolsRect.x, config.toolsRect.y, 256, "", 30);
+			toolsText.alignment = FlxTextAlign.CENTER;
+			toolsText.text = TOOLS_TEXT;
 		}
 		else
 		{
