@@ -76,8 +76,10 @@ class GameWorldState
 		
 		worldTable = null;
 		worldTable = new Map<Int,WorldStateEntry>();
-		var worldData:Dynamic = saveFile.data.worldTable.h;		
-		if (worldData == null) return;
+		var saveData:Dynamic = saveFile.data.worldTable;
+		if (saveData == null) return;
+		var worldData:Dynamic = saveData.h;		
+		
 		
 		for (key in Reflect.fields(worldData))
 		{
@@ -104,7 +106,7 @@ class GameWorldState
 			}			
 			worldTable[iKey] = worldState;
 		}		
-
+		saveFile.close();
 	}
 	
 	public function save():Void
@@ -134,6 +136,13 @@ class GameWorldState
 			saveTable[key] = worldState;
 		}
 		saveFile.data.worldTable = saveTable;
+		saveFile.flush();
+	}
+	
+	public function clearSave():Void
+	{
+		saveFile.bind(SAVE_SLOT);
+		saveFile.erase();
 		saveFile.flush();
 	}
 }

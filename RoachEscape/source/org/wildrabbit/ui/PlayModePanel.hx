@@ -141,7 +141,7 @@ class PlayModePanel extends FlxTypedSpriteGroup<FlxSprite>
 		for (objectiveData in objRef)
 		{
 			var objState:ObjectiveState = objStateList[medalIdx];
-			var revealed:Bool = medalIdx < 2 || objStateList[1].completed;
+			var revealed:Bool = medalIdx < 2 || objState.completed || objStateList[medalIdx - 1].completed;
 			var obj:ObjectivePanel = new ObjectivePanel(5, offset, atlas, medalIdx, objectiveData.getText(), revealed, objState.completed);
 			add(obj);	
 			medalIdx++;
@@ -218,10 +218,16 @@ class PlayModePanel extends FlxTypedSpriteGroup<FlxSprite>
 		visible = true;
 		active = true;
 		
+		var objStateList:Array<ObjectiveState> = Reg.gameWorld.worldTable[Reg.gameWorld.currentWorldIdx].levelObjectiveTable[Reg.gameWorld.currentLevelIdx].objectives;
+		var medalIdx:Int = 0;
+		
 		for (goal in goals)
 		{
-			goal.setRevealed(true, false);
-		}
+			var objState:ObjectiveState = objStateList[medalIdx];
+			var revealed:Bool = medalIdx < 2 || objState.completed || objStateList[medalIdx - 1].completed;
+			goal.setRevealed(revealed, objState.completed);
+			medalIdx++;						
+		}						
 
 		// update action buttons:
 		button1.updateBehaviour(AssetPaths.pause__png, onPauseToggle);
@@ -253,6 +259,12 @@ class PlayModePanel extends FlxTypedSpriteGroup<FlxSprite>
 	
 	public function updateObjective(idx:Int, completed:Bool):Void
 	{
-		goals[idx].setCompleted(completed);
+		var revealed:Bool = goals[idx].tickBox.visible;
+		goals[idx].setRevealed(completed ? true : revealed, completed);		
+	}
+	
+	public function setGoalRevealed(idx:Int, revealed:Bool, completed:Bool):Void
+	{
+		goals[idx].setRevealed(revealed, completed);
 	}
 }

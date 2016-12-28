@@ -15,6 +15,6 @@ class UIAtlasNames
 	public static inline var TICK_BOX:String = "ui_icons_07.png";
 	public static inline var LETTER_STRIKE:String = "ui_icons_06.png";
 	public static inline var MEDAL_BRONZE:String = "ui_icons_01.png";
-	public static inline var MEDAL_SILVER:String = "ui_icons_02.png";
-	public static inline var MEDAL_GOLD:String = "ui_icons_03.png";	
+	public static inline var MEDAL_GOLD:String = "ui_icons_02.png";
+	public static inline var MEDAL_SILVER:String = "ui_icons_03.png";	
 }

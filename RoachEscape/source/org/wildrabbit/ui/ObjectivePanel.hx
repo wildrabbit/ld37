@@ -18,12 +18,12 @@ class ObjectivePanel extends FlxSpriteGroup
 	private static inline var TEXT_WIDTH:Float = 136;
 	private var medal:FlxSprite = null;
 	private var description:FlxText= null;
-	private var tickBox:FlxSprite = null;
+	public var tickBox(default,null):FlxSprite = null;
 	private var tick:FlxSprite = null;
 	
 	private var objMessage:String = "";
 	
-	public function new(x:Float, y:Float, atlas: FlxAtlasFrames, medalType:Int, objText:String, completed:Bool, revealed:Bool = false) 
+	public function new(x:Float, y:Float, atlas: FlxAtlasFrames, medalType:Int, objText:String, revealed:Bool,completed:Bool) 
 	{
 		super(x, y);
 		

@@ -86,6 +86,7 @@ class PlayState extends FlxState
 	private var back:FlxButton;
 	private var next:FlxButton;
 	private var toggleSpeed:FlxButton;
+	private var clearSave:FlxButton;
 	
 	private var stageTxt:FlxText;
 	private var toolTxt:FlxText;
@@ -636,8 +637,9 @@ class PlayState extends FlxState
 
 						if (!objectiveState.completed && complete)
 						{
+							var revealed:Bool = idx < 2 || objectiveState.completed || levelState.objectives[idx - 1].completed;
 							objectiveState.completed = true;
-							hud.playPanel.updateObjective(idx, complete);
+							hud.playPanel.setGoalRevealed(idx, revealed, objectiveState.completed);
 						}
 						objectiveState.bestValue = bestInt;
 						objectiveState.bestFloat = bestFloat;
@@ -749,6 +751,31 @@ class PlayState extends FlxState
 			FlxG.switchState(new PlayState());
 		} );
 		add(next);
+		
+		clearSave = new FlxButton(155, 5, "del. save", function():Void
+		{
+			Reg.gameWorld.clearSave();
+			Reg.gameWorld.currentWorldIdx = 0;
+			Reg.gameWorld.currentLevelIdx = 0;
+			Reg.gameWorld.worldTable[Reg.gameWorld.currentWorldIdx] = new WorldStateEntry();
+			Reg.gameWorld.worldTable[Reg.gameWorld.currentWorldIdx].levelObjectiveTable = new Map<Int,LevelState>();
+			var data:LevelData = Reg.worldDatabase[Reg.gameWorld.currentWorldIdx].levels[Reg.gameWorld.currentLevelIdx];
+			var levelState = new LevelState();
+			var idx:Int = 0;
+			for (objData in data.objectives)
+			{
+				var objState:ObjectiveState = new ObjectiveState();
+				objState.completed = false;
+				objState.bestValue = 0;
+				objState.bestFloat = 0.0;
+				objState.bestSequence.splice(0,objState.bestSequence.length - 1);
+				levelState.objectives.push(objState);
+				hud.playPanel.setGoalRevealed(idx, false, false);
+				idx++;
+			}
+			Reg.gameWorld.worldTable[Reg.gameWorld.currentWorldIdx].levelObjectiveTable[Reg.gameWorld.currentLevelIdx] = levelState;
+		});
+		add(clearSave);
 		
 		stageTxt = new FlxText(5, 30, 0, "stage: " + stageMode, 14);
 		stageTxt.color = FlxColor.WHITE;
