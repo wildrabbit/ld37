@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<accordion width="150" height="300" id="myAccordion">
+	<vbox text="Section 1">
+		<button text="Button 1" />
+		<button text="Button 2" />
+		<button text="Button 3" />
+	</vbox>
+	<vbox text="Section 2">
+		<button text="Button 1" />
+		<button text="Button 2" />
+		<button text="Button 3" />
+	</vbox>
+	<vbox text="Section 3">
+		<button text="Button 1" />
+		<button text="Button 2" />
+		<button text="Button 3" />
+	</vbox>
+</accordion>
