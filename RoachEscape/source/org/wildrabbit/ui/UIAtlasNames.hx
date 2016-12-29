@@ -6,15 +6,16 @@ package org.wildrabbit.ui;
  */
 class UIAtlasNames
 {
-	public static inline var STAT_ICON_TILES_MOVED:String = "icon_moved.png";
-	public static inline var STAT_ICON_TIME:String = "ui_icons_08.png";
-	public static inline var STAT_ICON_TILES_PLACED:String = "ui_icons_09.png";
-	public static inline var STAT_ICON_BREADCRUMBS:String = "ui_icons_10.png";
+	public static inline var ICON_EMPTY_TOOL:String = "empty_tool.png";
+	public static inline var STAT_ICON_TILES_MOVED:String = "stat_tiles_traversed.png";
+	public static inline var STAT_ICON_TIME:String = "stat_time.png";
+	public static inline var STAT_ICON_TILES_PLACED:String = "stat_tiles_placed.png";
+	public static inline var STAT_ICON_BREADCRUMBS:String = "stat_breadcrumbs.png";
 
-	public static inline var TICK:String = "ui_icons_05.png";
-	public static inline var TICK_BOX:String = "ui_icons_07.png";
-	public static inline var LETTER_STRIKE:String = "ui_icons_06.png";
-	public static inline var MEDAL_BRONZE:String = "ui_icons_01.png";
-	public static inline var MEDAL_GOLD:String = "ui_icons_02.png";
-	public static inline var MEDAL_SILVER:String = "ui_icons_03.png";	
+	public static inline var TICK:String = "tick.png";
+	public static inline var TICK_BOX:String = "tickbox.png";
+	public static inline var LETTER_STRIKE:String = "failed_seq.png";
+	public static inline var MEDAL_BRONZE:String = "medal_bronze.png";
+	public static inline var MEDAL_GOLD:String = "medal_gold.png";
+	public static inline var MEDAL_SILVER:String = "medal_silver.png";	
 }

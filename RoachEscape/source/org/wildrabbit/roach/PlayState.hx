@@ -619,12 +619,18 @@ class PlayState extends FlxState
 								complete = (Reg.stats.timeSpent <= objective.value);
 								if (complete)
 									bestFloat = (!objectiveState.completed) ? Reg.stats.timeSpent: Math.min(Reg.stats.timeSpent, bestFloat);							
-							}	
+							}
+							case ObjectiveType.MAX_TILES_TRAVERSED: 
+							{
+								complete = (Reg.stats.tilesTraversed <= objective.value); 
+								if (complete)
+									bestInt = (!objectiveState.completed) ? Reg.stats.tilesTraversed : Math.round(Math.min(Reg.stats.tilesTraversed, bestInt));
+							}
 							case ObjectiveType.MIN_TILES_TRAVERSED: 
 							{
-								complete = (Reg.stats.tilesPlaced >= objective.value); 
+								complete = (Reg.stats.tilesTraversed >= objective.value); 
 								if (complete)
-									bestInt = (!objectiveState.completed) ? Reg.stats.tilesPlaced : Math.round(Math.max(Reg.stats.tilesPlaced, bestInt));
+									bestInt = (!objectiveState.completed) ? Reg.stats.tilesTraversed : Math.round(Math.max(Reg.stats.tilesTraversed, bestInt));
 							}
 							case ObjectiveType.REACH_GOAL:
 							{
@@ -774,6 +780,7 @@ class PlayState extends FlxState
 				idx++;
 			}
 			Reg.gameWorld.worldTable[Reg.gameWorld.currentWorldIdx].levelObjectiveTable[Reg.gameWorld.currentLevelIdx] = levelState;
+			FlxG.switchState(new PlayState());
 		});
 		add(clearSave);
 		

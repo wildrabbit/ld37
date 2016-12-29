@@ -29,3 +29,4 @@ sysinfo.txt
 *.apk
 *.unitypackage
 RoachEscape/export/
+tools/WorldEditor/bin/

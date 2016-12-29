@@ -11,15 +11,16 @@ import haxe.Json;
 
 enum ObjectiveType
 {
-	REACH_GOAL;
-	MAX_TILES_PLACED;
-	ALL_TILES_PLACED;
-	MAX_BUMPS;
-	MAX_TIME;
-	MIN_TILES_TRAVERSED;
-	ALL_COLLECTABLES_PICKED;
-	MIN_COLLECTABLES_PICKED;
-	COMPLETE_SEQUENCE;
+	REACH_GOAL; // 0
+	MAX_TILES_PLACED; // 1
+	ALL_TILES_PLACED; // 2
+	MAX_BUMPS; // 3
+	MAX_TIME; // 4
+	MIN_TILES_TRAVERSED; // 5
+	MAX_TILES_TRAVERSED; // 6
+	ALL_COLLECTABLES_PICKED; // 7
+	MIN_COLLECTABLES_PICKED; // 8
+	COMPLETE_SEQUENCE; // 9
 }
 
 class ObjectiveData
@@ -28,12 +29,13 @@ class ObjectiveData
 		"Reach the goal",
 		"Use at most #IPARAM0# tiles",
 		"Use all the tiles",
-		"Complete in less than #IPARAM0# bumps",
-		"Complete in less in less than #TPARAM0# mins",
-		"Complete traversing less than #IPARAM0# tiles",
-		"Complete picking all the #SPARAM0#",
-		"Complete picking at least #IPARAM0# #SPARAM0#",
-		"Complete picking #SPARAM0# in order"		
+		"Bump less than #IPARAM0# times",
+		"Complete in less than #TPARAM0#",
+		"Step on at least #IPARAM0# tiles",
+		"Step on less than #IPARAM0# tiles",
+		"Pick all the #SPARAM0#",
+		"Pick at least #IPARAM0# #SPARAM0#",
+		"Pick #SPARAM0# in order"		
 	];
 	
 	public var type:ObjectiveType;
@@ -67,7 +69,8 @@ class ObjectiveData
 		}
 		else if (type == ObjectiveType.MAX_TIME)
 		{
-			StringTools.replace(str,"#TPARAM0#", FlxStringUtil.formatTime(value, false));
+			str = StringTools.replace(str, "#TPARAM0#", FlxStringUtil.formatTime(value, false));
+			return str;
 		}
 		else if (type == ObjectiveType.ALL_COLLECTABLES_PICKED)
 		{
