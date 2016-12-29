@@ -25,6 +25,7 @@ import openfl.Assets;
 import org.wildrabbit.data.ObjectiveData;
 import org.wildrabbit.data.WorldData.LevelData;
 import org.wildrabbit.ui.HUD;
+import org.wildrabbit.ui.PauseLayer;
 import org.wildrabbit.world.Actor;
 import org.wildrabbit.world.GameContainer;
 import org.wildrabbit.world.GameWorldState.LevelState;
@@ -74,6 +75,7 @@ class PlayState extends FlxState
 	private var baseBackgroundLayer:FlxTilemapExt;
 	
 	private var hud:HUD;
+	private var pauseLayer:PauseLayer;
 	
 	private var stageMode:StageMode;
 	private var timeToAwake:Float;
@@ -171,6 +173,9 @@ class PlayState extends FlxState
 		hud.editPanel.buildToolButtons(currentTools, toolLibrary);
 		hud.onStageModeChanged(stageMode);
 		add(hud);
+		
+		pauseLayer = new PauseLayer();
+		// Don't add!
 		
 #if debug		
 		createDebugItems();
@@ -526,6 +531,12 @@ class PlayState extends FlxState
 	
 	public function setStageMode(newMode:StageMode)
 	{
+		if (stageMode == StageMode.PAUSE && newMode != StageMode.PAUSE)
+		{
+			pauseLayer.setPaused(false);
+			remove(pauseLayer);
+		}
+		
 		switch(newMode)
 		{
 			case StageMode.EDIT:
@@ -563,6 +574,9 @@ class PlayState extends FlxState
 				remove(select);
 				for (a in actors) { a.pause(true); }
 				gameContainer.removeFromSpriteLayer(playerTrail, GameContainer.SPRITE_PLAYER_BG_IDX);
+				
+				pauseLayer.setPaused(true);
+				add(pauseLayer);
 			}
 			case StageMode.OVER:
 			{
