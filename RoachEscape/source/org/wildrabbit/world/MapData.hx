@@ -61,7 +61,7 @@ class MapData extends TiledMap
 	
 	public function new(data:FlxTiledMapAsset) 
 	{
-		super(data, DATA_PATH);	
+		super(data, DATA_PATH);
 		numTiles = width * height;
 		tiles = new Vector<TileData>(numTiles);
 		for (i in 0...numTiles)
@@ -149,6 +149,9 @@ class MapData extends TiledMap
 			//state.room.build(this);
 			
 			var map:FlxTilemapExt = new FlxTilemapExt();
+#if (cpp || android)
+			map.useScaleHack = true;
+#end
 			map.loadMapFromArray(tileLayer.tileArray, width, height, fullPath, tileset.tileWidth, tileset.tileHeight, OFF, tileset.firstGID, 1, 1);
 			
 			if (tileLayer.properties.contains("type") && tileLayer.properties.get("type") == "base")

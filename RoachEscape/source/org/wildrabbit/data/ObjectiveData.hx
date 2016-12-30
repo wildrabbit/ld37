@@ -53,9 +53,13 @@ class ObjectiveData
 		value = (Reflect.hasField(obj, "value")) ? obj.value : 0;
 		paramId = (Reflect.hasField(obj, "paramId")) ? obj.paramId : 0;
 		
-		for (objSeq in Reflect.fields(obj.sequence))
+		if (Reflect.hasField(obj, "sequence"))
 		{
-			sequence.push(Reflect.field(obj.sequence, objSeq));
+			var seqArray:Array<Dynamic> = obj.sequence;
+			for (objSeq in seqArray)
+			{
+				sequence.push(objSeq);
+			}
 		}
 	}
 	

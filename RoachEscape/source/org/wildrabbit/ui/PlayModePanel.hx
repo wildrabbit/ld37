@@ -138,6 +138,7 @@ class PlayModePanel extends FlxTypedSpriteGroup<FlxSprite>
 	private function initGoalsPanel():Void 
 	{
 		goals = new Array<ObjectivePanel>();
+		
 		var objRef:Array<ObjectiveData> = Reg.currentLevel.objectives;
 		var height:Float = 36;
 		var medalIdx:Int = 0;

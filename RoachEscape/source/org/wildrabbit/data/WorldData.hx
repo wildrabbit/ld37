@@ -25,16 +25,23 @@ class LevelData
 		maxTiles = Reflect.hasField(obj, "maxTiles") ? obj.maxTiles: 0;
 		maxTime = Reflect.hasField(obj, "maxTime") ? obj.maxTime: 0;
 		
-		for (l in Reflect.fields(obj.loadouts))
+		if (Reflect.hasField(obj, "loadouts"))
 		{
-			var tool:PlaceableItemTool = Reflect.field(obj.loadouts, l);
-			loadouts.push(tool);
+			var loadoutArray:Array<Dynamic> = obj.loadouts;
+			for (l in loadoutArray)
+			{
+				var tool:PlaceableItemTool = { id:l.id, amount:l.amount };
+				loadouts.push(tool);
+			}
 		}
-		
-		for (o in Reflect.fields(obj.objectives))
+		if (Reflect.hasField(obj, "objectives"))
 		{
-			var objective:ObjectiveData= new ObjectiveData(Reflect.field(obj.objectives,o));				
-			objectives.push(objective);
+			var objArray:Array<Dynamic> = obj.objectives;
+			for (o in objArray)
+			{
+				var objective:ObjectiveData= new ObjectiveData(o);				
+				objectives.push(objective);
+			}			
 		}
 	}
 }
@@ -50,9 +57,11 @@ class WorldData
 	{
 		id = Reflect.hasField(obj, "id") ? obj.id : -1;
 		file = Reflect.hasField(obj, "file") ? obj.file : "";
-		for (l in Reflect.fields(obj.levels))
+		
+		var levelArray:Array<Dynamic> = obj.levels;
+		for (lv in levelArray)
 		{
-			var l:LevelData = new LevelData(Reflect.field(obj.levels, l));
+			var l:LevelData = new LevelData(lv);
 			levels.push(l);
 		}
 	}

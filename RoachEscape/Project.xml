@@ -2,7 +2,7 @@
 <project>
 	<!------------------------------APPLICATION SETTINGS---------------------------->
 	
-	<app title="RoachEscape" file="RoachEscape" main="org.wildrabbit.roach.Main" version="0.0.1" company="ith1ldin" />
+	<app title="RoachEscape" file="RoachEscape" main="org.wildrabbit.roach.Main" package="org.wildrabbit.roach" version="0.0.1" company="ith1ldin" />
 	
 	<!--The flixel preloader is not accurate in Chrome. You can use it regularly if you embed the swf into a html file
 	<!--or you can set the actual size of your file manually at "FlxPreloaderBase-onUpdate-bytesTotal"!-->

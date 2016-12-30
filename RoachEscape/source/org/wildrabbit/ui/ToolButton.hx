@@ -7,6 +7,7 @@ import flixel.system.FlxAssets.FlxGraphicAsset;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
+import org.wildrabbit.roach.AssetPaths;
 
 /**
  * ...
@@ -35,26 +36,12 @@ class ToolButton extends FlxSpriteGroup
 	
 	public function resetGraphic(W:Int, H:Int, colour:FlxColor):Void
 	{
-		col = colour;
-		w = W;
-		h = H;
-		baseButton.makeGraphic(W, H, col);
-		txt.text = "??";
-		txt.alignment = FlxTextAlign.CENTER;
-		txt.size = 20;
-		txt.x = x + baseButton.width / 2 - txt.width / 2;
-		txt.y = y + h /2 - txt.height/2;
+		baseButton.loadGraphic(AssetPaths.empty_tool__png);
+		txt.text = "";		
 	}
 	
 	public function setToolData(path:String, anims:Array<Int>, name:String, amount:Int):Void
 	{
-		txt.visible = true;
-		txt.text = Std.string(amount);
-		txt.alignment = FlxTextAlign.CENTER;
-		txt.size = 14;
-		txt.x = x + baseButton.width / 2 - txt.width / 2;
-		txt.y = y + baseButton.height - txt.height;
-		
 		baseButton.loadGraphic(path, true, 64, 64, false);
 		baseButton.setPosition(x + 4, y + 4);
 		baseButton.animation.add("normal",  [anims[0]], 1, false);
@@ -63,7 +50,13 @@ class ToolButton extends FlxSpriteGroup
 		
 		baseButton.animation.play("normal");
 		baseButton.text = "";
-		
+
+		txt.visible = true;
+		txt.text = Std.string(amount);
+		txt.alignment = FlxTextAlign.CENTER;
+		txt.size = 14;
+		txt.x = x + w / 2 - txt.width / 2;
+		txt.y = y + h - txt.height;
 	}
 	
 }

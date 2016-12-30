@@ -23,7 +23,7 @@ class GameStats
 	
 	public function new() 
 	{
-		
+		reset();
 	}	
 	
 	public function reset():Void

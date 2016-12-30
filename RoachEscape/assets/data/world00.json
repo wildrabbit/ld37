@@ -11,8 +11,8 @@
 		],
 		"objectives":[
 			{"id":0,"type":0,"value":0,"paramId":0,"sequence":[]},
-			{"id":1,"type":4,"value":3,"paramId":0,"sequence":[]},
-			{"id":2,"type":6,"value":10,"paramId":0,"sequence":[]}
+			{"id":1,"type":1,"value":1,"paramId":0,"sequence":[]},
+			{"id":2,"type":2,"value":0,"paramId":0,"sequence":[]}
 		],
 		"maxTiles":999,
 		"maxTime":60

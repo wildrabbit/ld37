@@ -59,7 +59,7 @@ class ObjectivePanel extends FlxSpriteGroup
 	
 	public function setRevealed(revealed:Bool, completed:Bool = false):Void
 	{		
-		description = new FlxText(medal.width + 4, 0, TEXT_WIDTH, revealed? objMessage : "??????", 16);
+		description.text = revealed? objMessage : "??????";
 		tickBox.visible = revealed;
 		tick.visible = revealed && completed;
 	}

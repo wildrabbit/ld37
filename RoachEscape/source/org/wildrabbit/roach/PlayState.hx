@@ -168,7 +168,7 @@ class PlayState extends FlxState
 		resetToolLoadout();
 		
 		select = new FlxSprite(0, 0, AssetPaths.select__png);
-		
+	
 		hud = new HUD(this);
 		hud.editPanel.buildToolButtons(currentTools, toolLibrary);
 		hud.onStageModeChanged(stageMode);
@@ -588,6 +588,7 @@ class PlayState extends FlxState
 					
 				if (result == Result.WON)
 				{
+					trace("YAY WON");
 					// Evaluate objectives:
 					var worldTable: WorldStateEntry = Reg.gameWorld.worldTable[Reg.gameWorld.currentWorldIdx];
 					var levelState: LevelState = worldTable.levelObjectiveTable[Reg.gameWorld.currentLevelIdx];
@@ -657,14 +658,15 @@ class PlayState extends FlxState
 
 						if (!objectiveState.completed && complete)
 						{
-							var revealed:Bool = idx < 2 || objectiveState.completed || levelState.objectives[idx - 1].completed;
 							objectiveState.completed = true;
+							var revealed:Bool = idx < 2 || objectiveState.completed || levelState.objectives[idx - 1].completed;
 							hud.playPanel.setGoalRevealed(idx, revealed, objectiveState.completed);
 						}
 						objectiveState.bestValue = bestInt;
 						objectiveState.bestFloat = bestFloat;
 						objectiveState.bestSequence.splice(0, objectiveState.bestSequence.length - 1);
 						objectiveState.bestSequence = bestSequence.copy();
+						trace("Processed obj " + Std.string(idx));
 						idx++;
 					}
 					
@@ -752,7 +754,7 @@ class PlayState extends FlxState
 			FlxG.timeScale = 1;
 		}
 	}
-	
+#if debug
 	private function createDebugItems():Void
 	{
 		// Add buttons to move across maps
@@ -811,4 +813,5 @@ class PlayState extends FlxState
 		lvTxt.color = FlxColor.WHITE;
 		add(lvTxt);
 	}
+#end
 }

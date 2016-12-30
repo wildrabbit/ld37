@@ -59,8 +59,8 @@ class MenuState extends FlxState
 				Reg.gameWorld.currentWorldIdx = Reg.gameWorld.currentLevelIdx = 0;
 				Reg.currentWorld = Reg.worldDatabase[Reg.gameWorld.currentWorldIdx];
 				Reg.currentLevel = Reg.currentWorld.levels[Reg.gameWorld.currentLevelIdx];
-				FlxG.switchState(new PlayState());
 				FlxG.sound.play(AssetPaths.play__wav);
+				FlxG.switchState(new PlayState());
 			}
 			
 		}

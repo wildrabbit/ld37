@@ -76,7 +76,6 @@ class Main extends Sprite
 			Reg.worldDatabase[w.id] = w;
 		}
 		
-		
 		// Initialise state
 		Reg.gameWorld.currentWorldIdx = 0;
 		Reg.gameWorld.currentLevelIdx = 0;
