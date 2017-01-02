@@ -30,6 +30,7 @@ import org.wildrabbit.ui.PauseLayer;
 import org.wildrabbit.ui.VictoryPopup;
 import org.wildrabbit.world.Actor;
 import org.wildrabbit.world.GameContainer;
+import org.wildrabbit.world.GameStats;
 import org.wildrabbit.world.GameWorldState.LevelState;
 import org.wildrabbit.world.GameWorldState.ObjectiveState;
 import org.wildrabbit.world.GameWorldState.WorldStateEntry;
@@ -307,9 +308,9 @@ class PlayState extends FlxState
 							&& currentTools[selectedToolIdx].id != entityData.templateID 
 							&& currentTools[selectedToolIdx].amount > 0;
 						var willReplace:Bool = existsOther && tile.type == selectedToolData.allowedTileType;
-						var removeScheduled:Bool = !existsOther || (existsOther && tile.type == selectedToolData.allowedTileType);
+						var removeScheduled:Bool = !existsOther || tile.type == selectedToolData.allowedTileType;
 						
-							if (removeScheduled)
+						if (removeScheduled)
 						{
 							var templateID:Int = entityData.templateID;
 							for (i in 0...currentTools.length)
@@ -347,10 +348,6 @@ class PlayState extends FlxState
 			// Check stats:
 			Reg.stats.tilesPlaced = gameContainer.placedItemsLayer.length;
 			Reg.stats.timeSpent += dt; // Beware of the timescale!!
-			FlxG.log.add("Time:" + FlxStringUtil.formatTime(Reg.stats.timeSpent,true));
-			
-			// Check game objectives
-			//....
 			
 			// Check position changes
 			playerMidPos = player.getRelativeMidPos();			
@@ -363,6 +360,24 @@ class PlayState extends FlxState
 			}
 			playerMidPos.put();
 			newPlayerCoords.put();
+			
+			// Check game limits
+			var tileFailed:Bool = Reg.stats.tilesTraversed > Reg.currentLevel.maxTiles;
+			var timeFailed:Bool = Reg.stats.timeSpent > Reg.currentLevel.maxTime;
+			if (tileFailed || timeFailed)
+			{
+				if (tileFailed)
+				{
+					hud.playPanel.playStatFail(StatType.TILES_TRAVERSED);
+				}
+				if (timeFailed)
+				{
+					hud.playPanel.playStatFail(StatType.TIME_SPENT);
+				}
+				result = Result.TIMEDOUT;
+				setStageMode(StageMode.OVER);
+			}
+
 		}
 		playerCoords.put();
 		
@@ -413,14 +428,13 @@ class PlayState extends FlxState
 			else 
 			{
 				selectedToolIdx = i;
-				add(select);
+				add(select);				
 				var pos:FlxPoint = hud.editPanel.tools[i].getMidpoint();
 				pos.subtract(select.width / 2, select.height / 2);
 				select.setPosition(pos.x, pos.y);
 				FlxTween.tween(select.scale, { x:1.1, y:1.1}, 0.5, { type:FlxTween.PINGPONG } );
 				pos.put();
-			}
-			
+			}			
 			
 		}
 		else 
@@ -683,17 +697,15 @@ class PlayState extends FlxState
 					
 					//Victory popup
 					var popup:VictoryPopup = new VictoryPopup();
-					add(popup);
-					popup.scale.set(0.25, 0.25);
-					var t:FlxTween = FlxTween.tween(popup.scale, { "x": 1, "y":1 }, 0.35, { type:FlxTween.ONESHOT, ease:FlxEase.backOut, onComplete:null} );
+					add(popup);	
+					popup.start();
 				}
 				else
 				{
 					//Defeat popup
 					var popup:DefeatPopup= new DefeatPopup();
 					add(popup);
-					popup.scale.set(0.25, 0.25);
-					var t:FlxTween = FlxTween.tween(popup.scale, { "x": 1, "y":1 }, 0.35, { type:FlxTween.ONESHOT, ease:FlxEase.backOut, onComplete:null} );					
+					popup.start();
 				}	
 				Reg.gameWorld.save();
 			}			

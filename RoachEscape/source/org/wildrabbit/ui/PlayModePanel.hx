@@ -6,6 +6,8 @@ import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup;
 import flixel.math.FlxRect;
 import flixel.text.FlxText;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 import org.wildrabbit.data.ObjectiveData;
@@ -273,5 +275,12 @@ class PlayModePanel extends FlxTypedSpriteGroup<FlxSprite>
 	public function setGoalRevealed(idx:Int, revealed:Bool, completed:Bool):Void
 	{
 		goals[idx].setRevealed(revealed, completed);
+	}
+	
+	public function playStatFail(type:StatType):Void
+	{
+		var stPanel:StatPanel = stats[Type.enumIndex(type)];
+		if (stPanel == null) return;
+		stPanel.playFail();
 	}
 }

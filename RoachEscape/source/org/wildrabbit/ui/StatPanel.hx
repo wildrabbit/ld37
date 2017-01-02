@@ -4,6 +4,9 @@ import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.group.FlxSpriteGroup;
 import flixel.text.FlxText;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
+import flixel.util.FlxColor;
 import flixel.util.FlxStringUtil;
 import org.wildrabbit.roach.AssetPaths;
 import org.wildrabbit.roach.Reg;
@@ -40,6 +43,7 @@ class StatPanel extends FlxSpriteGroup
 		counter = new FlxText(40, 8, 160, "", 16);
 		counter.font = AssetPaths.small_text__TTF;
 		counter.wordWrap = true;
+		counter.origin.set(120, 16);
 		add(counter);	
 		
 		updateValue();
@@ -51,7 +55,7 @@ class StatPanel extends FlxSpriteGroup
 		updateValue();
 	}
 	private function updateValue():Void
-	{
+	{		
 		switch(statType)
 		{
 			case StatType.BREADCUMBS:
@@ -64,12 +68,29 @@ class StatPanel extends FlxSpriteGroup
 			}
 			case StatType.TILES_TRAVERSED:
 			{
-				counter.text = Std.string(Reg.stats.tilesTraversed);
+				var ratio:Float = cast(Reg.stats.tilesTraversed / cast(Reg.currentLevel.maxTiles, Float), Float);
+				var colour:FlxColor = ratio > 0.85 ? FlxColor.RED: FlxColor.WHITE;
+				
+				counter.text = Std.string(Reg.stats.tilesTraversed) + "/" + Std.string(Reg.currentLevel.maxTiles);
+				counter.color = colour;
 			}
 			case StatType.TIME_SPENT:
 			{
-				counter.text = FlxStringUtil.formatTime(Reg.stats.timeSpent);
+				var ratio:Float = cast(Reg.stats.timeSpent/ cast(Reg.currentLevel.maxTime, Float), Float);
+				var colour:FlxColor = ratio > 0.85 ? FlxColor.RED: FlxColor.WHITE;
+				
+				var timeLimit:String = FlxStringUtil.formatTime(Reg.currentLevel.maxTime);
+				counter.text = FlxStringUtil.formatTime(Reg.stats.timeSpent) + "/" + timeLimit;
+				counter.color = colour;
 			}
 		}
+	}
+	public function playFail():Void
+	{
+		FlxTween.tween(counter.scale, { x:1.4, y:1.4 }, 0.15, { ease:FlxEase.backOut, onComplete: function(t:FlxTween):Void 
+			{
+				FlxTween.tween(counter.scale, { x:1, y:1 }, 0.15, { ease:FlxEase.quadIn } );
+			}		
+		});		
 	}
 }

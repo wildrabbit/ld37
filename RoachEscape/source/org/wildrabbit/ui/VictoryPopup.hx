@@ -30,6 +30,8 @@ class VictoryPopup extends FlxSpriteGroup
 	
 	private var bgLayer:FlxSprite;
 	
+	private var container:FlxSpriteGroup;
+	
 	private var popupBg:FlxSprite;
 	private var popupDeco:FlxSprite;
 	private var roachie:FlxSprite;
@@ -44,19 +46,22 @@ class VictoryPopup extends FlxSpriteGroup
 		super(0, 0);
 		
 		bgLayer = new FlxSprite(0, 0);
-		bgLayer.makeGraphic(FlxG.width, FlxG.height, 0x80000000);
+		bgLayer.makeGraphic(FlxG.width, FlxG.height, 0x80000000);		
 		add(bgLayer);
+		
+		container = new FlxSpriteGroup();
+		add(container);
 		
 		popupBg = new FlxSprite(148, 176);
 		popupBg.makeGraphic(512, 416, FlxColor.BLACK);
-		add(popupBg);
+		container.add(popupBg);
 		
 		// TODO: Deco + roachie
 		
 		title = new FlxText(266, 212, 278, TITLE_TEXT,48);		
 		
 		title.alignment = FlxTextAlign.CENTER;
-		add(title);
+		container.add(title);
 		
 		buttons = new Array<ActionButton>();
 		
@@ -68,14 +73,12 @@ class VictoryPopup extends FlxSpriteGroup
 		{
 			buttons.push(new ActionButton(btnStart.x, btnStart.y));			
 			btnStart.x += (btnWidth + btnSpace);
-			add(buttons[buttons.length - 1]);
+			container.add(buttons[buttons.length - 1]);
 		}
 		
 		buttons[BTN_NEXT].build(FlxRect.weak(0, 0, btnWidth, btnHeight), FlxColor.fromRGB(130, 0, 37), AssetPaths.next__png, onNextClick);
 		buttons[BTN_EDIT].build(FlxRect.weak(0, 0, btnWidth, btnHeight), FlxColor.fromRGB(130, 0, 37), AssetPaths.build__png, onEditClick);
 		buttons[BTN_MENU].build(FlxRect.weak(0, 0, btnWidth, btnHeight), FlxColor.fromRGB(130, 0, 37), AssetPaths.menu__png, onMenuClick);
-		
-		origin.set(384,384);
 	}
 	
 	public function onNextClick():Void 
@@ -114,7 +117,8 @@ class VictoryPopup extends FlxSpriteGroup
 		FlxTween.tween(scale, { x:0, y:0 }, 0.15, { ease:FlxEase.backIn, onComplete: function(t:FlxTween):Void 
 			{ 
 				destroy(); 
-				FlxG.switchState(new PlayState()); 				
+				cast(FlxG.state, PlayState).setStageMode(StageMode.EDIT);
+				//FlxG.switchState(new PlayState()); 				
 			}			
 		} );
 	}
@@ -122,5 +126,11 @@ class VictoryPopup extends FlxSpriteGroup
 	public function onMenuClick():Void
 	{
 		trace("Menu!");
+	}
+	
+	public function start():Void
+	{
+		container.scale.set(0.25, 0.25);
+		var t:FlxTween = FlxTween.tween(container.scale, { "x": 1, "y":1 }, 0.35, { type:FlxTween.ONESHOT, ease:FlxEase.backOut, onComplete:null} );
 	}
 }

@@ -28,6 +28,7 @@ class DefeatPopup extends FlxSpriteGroup
 	private static inline var NUM_BUTTONS:Int = 2;
 	
 	private var bgLayer:FlxSprite;
+	private var container:FlxSpriteGroup;
 	
 	private var popupBg:FlxSprite;
 	private var popupDeco:FlxSprite;
@@ -46,20 +47,22 @@ class DefeatPopup extends FlxSpriteGroup
 		bgLayer.makeGraphic(FlxG.width, FlxG.height, 0x80000000);
 		add(bgLayer);
 		
-		popupBg = new FlxSprite(126, 176);
+		container = new FlxSpriteGroup();
+		add(container);
+		
+		popupBg = new FlxSprite(128, 176);
 		popupBg.makeGraphic(512, 416, FlxColor.BLACK);
-		add(popupBg);
+		container.add(popupBg);
 		
 		// TODO: Deco + roachie
 		
-		title = new FlxText(0, 212, 278, TITLE_TEXT,48);		
-		
+		title = new FlxText(128, 212, 512, TITLE_TEXT,48);				
 		title.alignment = FlxTextAlign.CENTER;
-		add(title);
+		container.add(title);
 		
 		buttons = new Array<ActionButton>();
 		
-		var btnStart:FlxPoint = new FlxPoint(209, 508);
+		var btnStart:FlxPoint = new FlxPoint(230, 508);
 		var btnWidth:Float = 146;
 		var btnHeight = 56;
 		var btnSpace:Float = 16;
@@ -67,13 +70,11 @@ class DefeatPopup extends FlxSpriteGroup
 		{
 			buttons.push(new ActionButton(btnStart.x, btnStart.y));			
 			btnStart.x += (btnWidth + btnSpace);
-			add(buttons[buttons.length - 1]);
+			container.add(buttons[buttons.length - 1]);
 		}
 		
 		buttons[BTN_EDIT].build(FlxRect.weak(0, 0, btnWidth, btnHeight), FlxColor.fromRGB(130, 0, 37), AssetPaths.build__png, onEditClick);
 		buttons[BTN_MENU].build(FlxRect.weak(0, 0, btnWidth, btnHeight), FlxColor.fromRGB(130, 0, 37), AssetPaths.menu__png, onMenuClick);
-		
-		origin.set(384,384);
 	}
 	
 	public function onEditClick():Void
@@ -81,7 +82,8 @@ class DefeatPopup extends FlxSpriteGroup
 		FlxTween.tween(scale, { x:0, y:0 }, 0.15, { ease:FlxEase.backIn, onComplete: function(t:FlxTween):Void 
 			{ 
 				destroy(); 
-				FlxG.switchState(new PlayState()); 				
+				cast(FlxG.state, PlayState).setStageMode(StageMode.EDIT);
+				//FlxG.switchState(new PlayState()); 				
 			}			
 		} );
 	}
@@ -90,4 +92,10 @@ class DefeatPopup extends FlxSpriteGroup
 	{
 		trace("Menu!");
 	}
-}
+	
+	public function start():Void
+	{
+		container.scale.set(0.25, 0.25);
+		var t:FlxTween = FlxTween.tween(container.scale, { "x": 1, "y":1 }, 0.35, { type:FlxTween.ONESHOT, ease:FlxEase.backOut, onComplete:null} );
+	}
+} 

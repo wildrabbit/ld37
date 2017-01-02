@@ -25,7 +25,7 @@ class HUD extends FlxTypedSpriteGroup<FlxSprite>
 	private static inline var PLAY_TEXT:String = "PLAYING";
 	private static inline var PAUSE_TEXT:String = "PAUSED";
 	private static inline var YOU_WON_TEXT:String = "VICTORY!";
-	private static inline var YOU_LOST_TEXT:String = "KEEP TRYING!";
+	private static inline var YOU_LOST_TEXT:String = "UH OH...";
 
 	public var gameModeTitle: FlxText;
 
@@ -100,13 +100,14 @@ class HUD extends FlxTypedSpriteGroup<FlxSprite>
 				{
 					gameModeTitle.text =  YOU_WON_TEXT;
 					playPanel.goToGameWon();					
+					playPanel.active = false;
 				}
 				else 
 				{
 					gameModeTitle.text = YOU_LOST_TEXT;
 					playPanel.goToGameLost();					
-				}
-				
+					playPanel.active = false;
+				}						
 				// change decoration state
 				
 				// show Layer

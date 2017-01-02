@@ -12,8 +12,8 @@ class LevelData
 	public var loadouts:Array<PlaceableItemTool> = new Array<PlaceableItemTool>();
 	
 	// Defeat conditions
-	var maxTiles:Int = 999;
-	var maxTime:Float = 180;
+	public var maxTiles:Int = 999;
+	public var maxTime:Float = 180;
 	
 	public var objectives:Array<ObjectiveData> = new Array<ObjectiveData>();	
 

@@ -14,7 +14,7 @@ class MenuState extends FlxState
 {
 	var cover:FlxSprite;
 	var msg:FlxSprite = null;
-	var delay:Float = 2;
+	var delay:Float = 0.8;
 	var t:FlxTween;
 	/**
 	 * Function that is called up when to state is created to set it up.
