@@ -85,6 +85,9 @@ class Main extends Sprite
 		Reg.gameWorld.load();
 
 		addChild(new FlxGame(gameWidth, gameHeight, initialState, zoom, framerate, framerate, skipSplash, startFullscreen));
+
+		FlxG.sound.volume = 0.1;
+
 		FlxG.log.redirectTraces = true;
 	}
 }

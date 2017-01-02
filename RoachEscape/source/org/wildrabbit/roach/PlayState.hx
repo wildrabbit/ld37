@@ -24,8 +24,10 @@ import haxe.ds.Vector;
 import openfl.Assets;
 import org.wildrabbit.data.ObjectiveData;
 import org.wildrabbit.data.WorldData.LevelData;
+import org.wildrabbit.ui.DefeatPopup;
 import org.wildrabbit.ui.HUD;
 import org.wildrabbit.ui.PauseLayer;
+import org.wildrabbit.ui.VictoryPopup;
 import org.wildrabbit.world.Actor;
 import org.wildrabbit.world.GameContainer;
 import org.wildrabbit.world.GameWorldState.LevelState;
@@ -670,18 +672,31 @@ class PlayState extends FlxState
 						idx++;
 					}
 					
-					// Show results
+/*					// Show results
 					var youWon:FlxText = new FlxText((baseBackgroundLayer.x + baseBackgroundLayer.width) / 2, (baseBackgroundLayer.y + baseBackgroundLayer.height) / 2, 0, "WELL DONE!", 72);
 					youWon.alignment = FlxTextAlign.CENTER;
 					youWon.x -= youWon.width / 2;
 					youWon.y -= youWon.height /2;
 					add(youWon);
 					youWon.scale.set(0.25, 0.25);
-					var t:FlxTween = FlxTween.tween(youWon.scale, { "x": 1.25, "y":1.25 }, 0.35, { type:FlxTween.ONESHOT, ease:FlxEase.backOut, onComplete:onNextLevel } );
+					var t:FlxTween = FlxTween.tween(youWon.scale, { "x": 1.25, "y":1.25 }, 0.35, { type:FlxTween.ONESHOT, ease:FlxEase.backOut, onComplete:onNextLevel } );*/
+					
+					//Victory popup
+					var popup:VictoryPopup = new VictoryPopup();
+					add(popup);
+					popup.scale.set(0.25, 0.25);
+					var t:FlxTween = FlxTween.tween(popup.scale, { "x": 1, "y":1 }, 0.35, { type:FlxTween.ONESHOT, ease:FlxEase.backOut, onComplete:null} );
 				}
-				
+				else
+				{
+					//Defeat popup
+					var popup:DefeatPopup= new DefeatPopup();
+					add(popup);
+					popup.scale.set(0.25, 0.25);
+					var t:FlxTween = FlxTween.tween(popup.scale, { "x": 1, "y":1 }, 0.35, { type:FlxTween.ONESHOT, ease:FlxEase.backOut, onComplete:null} );					
+				}	
 				Reg.gameWorld.save();
-			}
+			}			
 		}
 		stageMode = newMode;
 		hud.onStageModeChanged(stageMode);
