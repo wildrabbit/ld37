@@ -12,7 +12,7 @@ import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 import org.wildrabbit.roach.AssetPaths;
-import org.wildrabbit.roach.PlayState;
+import org.wildrabbit.roach.states.PlayState;
 import org.wildrabbit.world.PlaceableItemData;
 
 /**

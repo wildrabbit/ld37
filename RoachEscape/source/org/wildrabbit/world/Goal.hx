@@ -1,10 +1,11 @@
 package org.wildrabbit.world;
+import org.wildrabbit.roach.states.PlayState;
 
 import flash.display.BlendMode;
 import flixel.FlxSprite;
 import flixel.system.FlxAssets.FlxGraphicAsset;
 import org.wildrabbit.roach.AssetPaths;
-import org.wildrabbit.roach.PlayState.StageMode;
+import org.wildrabbit.roach.states.PlayState.StageMode;
 
 /**
  * ...

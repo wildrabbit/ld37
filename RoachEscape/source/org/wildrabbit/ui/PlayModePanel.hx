@@ -12,7 +12,7 @@ import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 import org.wildrabbit.data.ObjectiveData;
 import org.wildrabbit.roach.AssetPaths;
-import org.wildrabbit.roach.PlayState;
+import org.wildrabbit.roach.states.PlayState;
 import org.wildrabbit.roach.Reg;
 import org.wildrabbit.world.GameStats.StatType;
 import org.wildrabbit.world.GameWorldState.ObjectiveState;
@@ -202,7 +202,10 @@ class PlayModePanel extends FlxTypedSpriteGroup<FlxSprite>
 	{
 		parent.playPressed();
 		FlxG.sound.play(AssetPaths.play__wav);
-
+		for (stat in stats)
+		{
+			stat.resetScale();
+		}
 	}
 	
 	public function onMenu():Void

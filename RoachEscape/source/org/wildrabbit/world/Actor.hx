@@ -1,5 +1,5 @@
 package org.wildrabbit.world;
-import org.wildrabbit.roach.PlayState.StageMode;
+import org.wildrabbit.roach.states.PlayState.StageMode;
 import flixel.FlxSprite;
 import flixel.system.FlxAssets.FlxGraphicAsset;
 import flixel.math.FlxPoint;

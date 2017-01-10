@@ -1,5 +1,5 @@
 package org.wildrabbit.data;
-import org.wildrabbit.roach.PlayState;
+import org.wildrabbit.roach.states.PlayState;
 import org.wildrabbit.data.ObjectiveData;
 
 

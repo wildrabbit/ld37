@@ -24,7 +24,10 @@ class StatPanel extends FlxSpriteGroup
 	private static inline var TEXT_WIDTH:Float = 136;
 	
 	private var icon:FlxSprite = null;
+	private var iconT:FlxTween = null;
+	
 	private var counter:FlxText = null;
+	private var counterT:FlxTween = null;
 	
 	private var statType:StatType;
 	
@@ -38,12 +41,13 @@ class StatPanel extends FlxSpriteGroup
 		icon = new FlxSprite(0, 0);
 		icon.frames = atlas;
 		icon.animation.frameName = STAT_ICONS[Type.enumIndex(statType)];
+		icon.origin.set(icon.frameWidth/ 2, icon.frameHeight/ 2);
 		add(icon);
 		
 		counter = new FlxText(40, 8, 160, "", 16);
 		counter.font = AssetPaths.small_text__TTF;
 		counter.wordWrap = true;
-		counter.origin.set(120, 16);
+		counter.origin.set(counter.width/ 2, counter.height / 2);
 		add(counter);	
 		
 		updateValue();
@@ -85,11 +89,28 @@ class StatPanel extends FlxSpriteGroup
 			}
 		}
 	}
+	
+	public function resetScale():Void
+	{
+		if (iconT != null) iconT.cancel();
+		icon.scale.set(1, 1);
+		
+		if (counterT != null) counterT.cancel();		
+		counter.scale.set(1, 1);		
+	}
+	
 	public function playFail():Void
 	{
-		FlxTween.tween(counter.scale, { x:1.4, y:1.4 }, 0.15, { ease:FlxEase.backOut, onComplete: function(t:FlxTween):Void 
+		counterT = FlxTween.tween(counter.scale, { y:1.2 }, 0.25, { ease:FlxEase.backOut, 
+			onComplete: function(t:FlxTween):Void 
 			{
-				FlxTween.tween(counter.scale, { x:1, y:1 }, 0.15, { ease:FlxEase.quadIn } );
+				counterT = FlxTween.tween(counter.scale, { y:1 }, 0.15, { ease:FlxEase.quadIn , onComplete:function(t:FlxTween) { counterT = null; }} );
+			}		
+		});		
+		
+		iconT = FlxTween.tween(icon.scale, { x:1.2, y:1.2 }, 0.25, { ease:FlxEase.backOut, onComplete: function(t:FlxTween):Void 
+			{
+				iconT = FlxTween.tween(icon.scale, { x:1, y:1 }, 0.15, { ease:FlxEase.quadIn, onComplete:function(t:FlxTween) { iconT = null; } } );
 			}		
 		});		
 	}

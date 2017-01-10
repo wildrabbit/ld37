@@ -11,8 +11,8 @@ import flixel.tweens.FlxTween;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 import org.wildrabbit.roach.AssetPaths;
-import org.wildrabbit.roach.EndState;
-import org.wildrabbit.roach.PlayState;
+import org.wildrabbit.roach.states.EndState;
+import org.wildrabbit.roach.states.PlayState;
 import org.wildrabbit.roach.Reg;
 
 /**
@@ -104,7 +104,7 @@ class VictoryPopup extends FlxSpriteGroup
 			Reg.currentLevel = Reg.currentWorld.levels[Reg.gameWorld.currentLevelIdx];
 		}
 		
-		FlxTween.tween(scale, { x:0, y:0 }, 0.15, { ease:FlxEase.backIn, onComplete: function(t:FlxTween):Void 
+		FlxTween.tween(scale, { x:0, y:0 }, 0.25, { ease:FlxEase.backIn, onComplete: function(t:FlxTween):Void 
 			{ 
 				destroy(); 
 				FlxG.switchState(new PlayState()); 				
@@ -131,6 +131,9 @@ class VictoryPopup extends FlxSpriteGroup
 	public function start():Void
 	{
 		container.scale.set(0.25, 0.25);
-		var t:FlxTween = FlxTween.tween(container.scale, { "x": 1, "y":1 }, 0.35, { type:FlxTween.ONESHOT, ease:FlxEase.backOut, onComplete:null} );
+		var t:FlxTween = FlxTween.tween(container.scale, { "x": 1, "y":1 }, 0.35, { type:FlxTween.ONESHOT, ease:FlxEase.backOut, onComplete:null } );
+		
+		bgLayer.scale.set(0.25, 0.25);
+		var t:FlxTween = FlxTween.tween(bgLayer.scale, { "x": 1, "y":1 }, 0.35, { type:FlxTween.ONESHOT, ease:FlxEase.backOut, onComplete:null} );
 	}
 }

@@ -12,7 +12,7 @@ import flixel.util.FlxColor;
 import flixel.util.FlxSpriteUtil.DrawStyle;
 import flixel.util.FlxSpriteUtil.LineStyle;
 import org.wildrabbit.roach.AssetPaths;
-import org.wildrabbit.roach.PlayState;
+import org.wildrabbit.roach.states.PlayState;
 import org.wildrabbit.roach.Reg;
 import org.wildrabbit.world.MapData.TileData;
 import org.wildrabbit.world.MapData.TileType;

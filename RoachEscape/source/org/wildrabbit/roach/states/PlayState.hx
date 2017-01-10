@@ -1,4 +1,4 @@
-package org.wildrabbit.roach;
+package org.wildrabbit.roach.states;
 
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -7,6 +7,10 @@ import flixel.addons.editors.tiled.TiledTileLayer;
 import flixel.addons.editors.tiled.TiledTileSet;
 import flixel.addons.effects.FlxTrail;
 import flixel.addons.tile.FlxTilemapExt;
+import flixel.addons.transition.FlxTransitionSprite;
+import flixel.addons.transition.FlxTransitionableState;
+import flixel.addons.transition.Transition;
+import flixel.addons.transition.TransitionData;
 import flixel.group.FlxGroup;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.input.FlxPointer;
@@ -24,6 +28,8 @@ import haxe.ds.Vector;
 import openfl.Assets;
 import org.wildrabbit.data.ObjectiveData;
 import org.wildrabbit.data.WorldData.LevelData;
+import org.wildrabbit.roach.states.EndState;
+import org.wildrabbit.roach.states.MenuState;
 import org.wildrabbit.ui.DefeatPopup;
 import org.wildrabbit.ui.HUD;
 import org.wildrabbit.ui.PauseLayer;
@@ -177,8 +183,7 @@ class PlayState extends FlxState
 		hud.onStageModeChanged(stageMode);
 		add(hud);
 		
-		pauseLayer = new PauseLayer();
-		// Don't add!
+		pauseLayer = new PauseLayer();	
 		
 #if debug		
 		createDebugItems();
@@ -188,11 +193,6 @@ class PlayState extends FlxState
 		goalSound.stop();
 		
 		fastForward = false;
-		
-		
-		FlxG.watch.add(Reg.stats, "tilesPlaced");
-		FlxG.watch.add(Reg.stats, "tilesTraversed");
-		FlxG.watch.add(Reg.stats, "bumps");
 	}
 	
 	public function buildPlayer(playerData: PlayerData):Void
@@ -557,6 +557,12 @@ class PlayState extends FlxState
 		{
 			case StageMode.EDIT:
 			{
+				destroySubStates = true;
+				var t:Transition = new Transition(new TransitionData(TransitionType.FADE, FlxColor.BLACK, 0.8));
+				t.start(TransitionStatus.OUT);
+				t.finishCallback = closeSubState;
+				openSubState(t);
+				
 				resetTimescale();
 				remove(select);
 				gameContainer.removeFromSpriteLayer(playerTrail, GameContainer.SPRITE_PLAYER_BG_IDX);

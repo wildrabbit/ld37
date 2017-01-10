@@ -7,7 +7,7 @@ import flixel.addons.tile.FlxTilemapExt;
 import flixel.math.FlxPoint;
 import haxe.ds.Vector;
 import haxe.io.Path;
-import org.wildrabbit.roach.PlayState;
+import org.wildrabbit.roach.states.PlayState;
 
 import flixel.addons.editors.tiled.TiledImageLayer;
 import flixel.addons.editors.tiled.TiledMap;
