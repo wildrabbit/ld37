@@ -65,6 +65,7 @@ class TabWidget extends FlxSpriteGroup
 		add(tabPages[currentPageIdx]);		
 		tabButtons[currentPageIdx].setActive();
 		tabPages[currentPageIdx].enable();
+		tabPages[currentPageIdx].refreshVisibility();
 	}
 	
 	public function setPageEnabled(pageIdx:Int, value:Bool):Void
@@ -73,6 +74,7 @@ class TabWidget extends FlxSpriteGroup
 		{			
 			tabButtons[pageIdx].setActive();
 			tabPages[pageIdx].enable();
+			tabPages[pageIdx].refreshVisibility();
 		}
 		else 
 		{
@@ -84,5 +86,13 @@ class TabWidget extends FlxSpriteGroup
 	public function setActivePageEnabled(value:Bool):Void
 	{
 		setPageEnabled(currentPageIdx, value);
+	}
+	
+	public function refreshVisibility():Void
+	{
+		for (page in tabPages)
+		{
+			page.refreshVisibility();
+		}		
 	}
 }

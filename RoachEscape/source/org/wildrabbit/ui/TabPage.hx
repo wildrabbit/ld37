@@ -25,4 +25,8 @@ class TabPage extends FlxSpriteGroup
 	{
 		
 	}	
+	
+	public function refreshVisibility():Void
+	{
+	}
 }

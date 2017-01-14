@@ -142,7 +142,7 @@ class PlayModePanel extends FlxTypedSpriteGroup<FlxSprite>
 
 		button1 = initButton(config.pauseRect, onPauseToggle, config.buttonColour, AssetPaths.pause__png);		
 		button2 = initButton(config.ffRect, onFastForward, config.buttonColour, AssetPaths.fastforward__png);		
-		button3 = initButton( config.editRect, onEdit, config.buttonColour, AssetPaths.build__png);
+		button3 = initButton( config.editRect, onEdit, config.buttonColour, AssetPaths.stop__png);
 	}
 	
 	private function initButton(rect:FlxRect, callback:Void->Void, bgColour:FlxColor ,icon:Dynamic):ActionButton
@@ -202,12 +202,12 @@ class PlayModePanel extends FlxTypedSpriteGroup<FlxSprite>
 		active = true;
 		
 		tabWidget.setPage(PAGE_STATS);
+		tabWidget.refreshVisibility();
 		
-		goalsPage.updateAllGoals();						
 		// update action buttons:
 		button1.updateBehaviour(AssetPaths.pause__png, onPauseToggle);
 		button2.updateBehaviour(AssetPaths.fastforward__png, onFastForward);
-		button3.updateBehaviour(AssetPaths.build__png, onEdit);
+		button3.updateBehaviour(AssetPaths.stop__png, onEdit);
 	}
 	
 	public function goToGameLost():Void
@@ -216,7 +216,7 @@ class PlayModePanel extends FlxTypedSpriteGroup<FlxSprite>
 		// update action buttons:
 		button1.updateBehaviour(AssetPaths.play__png, onPlay);
 		button2.updateBehaviour(AssetPaths.menu__png, onMenu);
-		button3.updateBehaviour(AssetPaths.build__png, onEdit);
+		button3.updateBehaviour(AssetPaths.stop__png, onEdit);
 	}
 	
 	public function goToGameWon():Void
@@ -224,7 +224,7 @@ class PlayModePanel extends FlxTypedSpriteGroup<FlxSprite>
 		tabWidget.setPage(PAGE_GOALS);
 		button1.updateBehaviour(AssetPaths.next__png, onNextLevel);
 		button2.updateBehaviour(AssetPaths.play__png, onPlay);
-		button3.updateBehaviour(AssetPaths.build__png, onEdit);
+		button3.updateBehaviour(AssetPaths.stop__png, onEdit);
 	}
 	
 	public function goToPause():Void

@@ -120,7 +120,7 @@ class Player extends Actor
 				}
 				else 
 				{
-					if (checkInteraction() && !interactedLastFrame)
+					if (!interactedLastFrame && checkInteraction())
 					{						
 						setRelativePos(midCoords.x, midCoords.y);
 						interact = true;
@@ -204,6 +204,7 @@ class Player extends Actor
 			if (midPos.distanceTo(itemMid) < MIDPOINT_DISTANCE_THRESHOLD)
 			{					
 				item.onEntityInteracted(this);
+				Reg.stats.tilesPlaced++;
 				return true;				
 			}
 			midPos.put();

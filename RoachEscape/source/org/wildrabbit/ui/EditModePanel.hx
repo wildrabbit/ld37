@@ -58,6 +58,10 @@ class EditModePanel extends FlxTypedSpriteGroup<FlxSprite>
 	public var tilesPage: TilesPage;
 	public var goalsPage: GoalsPage;
 	public var settingsPage: SettingsPage;
+	
+	private static inline var PAGE_TILES:Int = 0;
+	private static inline var PAGE_GOALS:Int = 1;
+	private static inline var PAGE_SETTINGS:Int = 2;
 
 	
 	private var orientations: Array<EditOrientationData> = [
@@ -68,11 +72,11 @@ class EditModePanel extends FlxTypedSpriteGroup<FlxSprite>
 			clearRect: FlxRect.get(88, 100, 68, 68),
 			menuRect: FlxRect.get(176, 100, 68, 68),
 			baseX: 32,
-			baseY: 91,
+			baseY: 32,
 			buttonWidth: 72,
-			buttonHeight: 96,
+			buttonHeight: 88,
 			spaceX:24,
-			spaceY:24,
+			spaceY:16,
 			colour:FlxColor.fromString("#AF980B"),
 			buttonColour:FlxColor.fromRGB(130,0,37),
 			buttonSize:20,
@@ -84,7 +88,7 @@ class EditModePanel extends FlxTypedSpriteGroup<FlxSprite>
 			clearRect: FlxRect.get(36, 638, 168, 56),
 			menuRect: FlxRect.get(36, 702, 168, 56),
 			baseX:32,
-			baseY: 91,
+			baseY: 32,
 			buttonWidth: 72,
 			buttonHeight: 96,
 			spaceX:24,
@@ -173,7 +177,8 @@ class EditModePanel extends FlxTypedSpriteGroup<FlxSprite>
 		active = true;
 		visible = true;
 		
-		tabWidget.setActivePageEnabled(true);
+		tabWidget.setPage(PAGE_TILES);
+		tabWidget.refreshVisibility();
 	}
 	
 	public function goToPlay():Void

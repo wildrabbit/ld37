@@ -97,7 +97,6 @@ class PlayState extends FlxState
 	private var back:FlxButton;
 	private var next:FlxButton;
 	private var toggleSpeed:FlxButton;
-	private var clearSave:FlxButton;
 	
 	private var stageTxt:FlxText;
 	private var toolTxt:FlxText;
@@ -296,17 +295,19 @@ class PlayState extends FlxState
 				var tile:TileData = levelData.getTileAt(coords);
 				if (tile.type != TileType.EMPTY)
 				{
+					var selectedToolData:PlaceableItemData = selectedToolIdx >= 0 ? toolLibrary.get(currentTools[selectedToolIdx].id) : null;
 					var entity:PlaceableItem = getItemAtPos(coords);
 					if (entity != null)
-					{
-						var selectedToolData:PlaceableItemData = selectedToolIdx >= 0 ? toolLibrary.get(currentTools[selectedToolIdx].id) : null;
+					{ 
+						// WE KNOW there is something here. 
+						
 						var entityData:PlaceableItemData = entity.itemData;
 						
-						var existsOther:Bool = selectedToolIdx >= 0 
+						var canPlaceSelection:Bool = selectedToolIdx >= 0 
 							&& currentTools[selectedToolIdx].id != entityData.templateID 
 							&& currentTools[selectedToolIdx].amount > 0;
-						var willReplace:Bool = existsOther && tile.type == selectedToolData.allowedTileType;
-						var removeScheduled:Bool = !existsOther || tile.type == selectedToolData.allowedTileType;
+						var willReplace:Bool = canPlaceSelection && tile.type == selectedToolData.allowedTileType;
+						var removeScheduled:Bool = true;
 						
 						if (removeScheduled)
 						{
@@ -317,6 +318,11 @@ class PlayState extends FlxState
 								{
 									currentTools[i].amount++;
 									hud.editPanel.updateToolPage(i, currentTools[i].amount);
+									if (selectedToolIdx < 0)
+									{
+										selectedToolIdx = i;
+										hud.editPanel.selectTool(i);
+									}
 								}
 							}
 							gameContainer.removePlaceableItem(entity);
@@ -328,10 +334,10 @@ class PlayState extends FlxState
 						{
 							createNewPlaceableItem(selectedToolData, coords);
 						}
-
 					}
-					else {
-						if (selectedToolIdx >= 0 && currentTools[selectedToolIdx].amount > 0)
+					else 
+					{
+						if (selectedToolData != null && currentTools[selectedToolIdx].amount > 0 && tile.type == selectedToolData.allowedTileType)
 						{
 							createNewPlaceableItem(toolLibrary.get(currentTools[selectedToolIdx].id), coords);
 						}
@@ -344,7 +350,7 @@ class PlayState extends FlxState
 		else if (stageMode == StageMode.PLAY && timeToAwake < 0)
 		{			
 			// Check stats:
-			Reg.stats.tilesPlaced = gameContainer.placedItemsLayer.length;
+			//Reg.stats.tilesPlaced = gameContainer.placedItemsLayer.length;
 			Reg.stats.timeSpent += dt; // Beware of the timescale!!
 			
 			// Check position changes
@@ -779,11 +785,37 @@ class PlayState extends FlxState
 			FlxG.timeScale = 1;
 		}
 	}
+	
+	public function resetSave():Void
+	{
+		Reg.gameWorld.clearSave();
+		Reg.gameWorld.currentWorldIdx = 0;
+		Reg.gameWorld.currentLevelIdx = 0;
+		Reg.currentLevel = Reg.currentWorld.levels[Reg.gameWorld.currentLevelIdx];
+		Reg.gameWorld.worldTable[Reg.gameWorld.currentWorldIdx] = new WorldStateEntry();
+		Reg.gameWorld.worldTable[Reg.gameWorld.currentWorldIdx].levelObjectiveTable = new Map<Int,LevelState>();
+		var data:LevelData = Reg.worldDatabase[Reg.gameWorld.currentWorldIdx].levels[Reg.gameWorld.currentLevelIdx];
+		var levelState = new LevelState();
+		var idx:Int = 0;
+		for (objData in data.objectives)
+		{
+			var objState:ObjectiveState = new ObjectiveState();
+			objState.completed = false;
+			objState.bestValue = 0;
+			objState.bestFloat = 0.0;
+			objState.bestSequence.splice(0,objState.bestSequence.length - 1);
+			levelState.objectives.push(objState);
+			hud.playPanel.setGoalRevealed(idx, false, false);
+			idx++;
+		}
+		Reg.gameWorld.worldTable[Reg.gameWorld.currentWorldIdx].levelObjectiveTable[Reg.gameWorld.currentLevelIdx] = levelState;
+		FlxG.switchState(new PlayState());
+	}
 #if debug
 	private function createDebugItems():Void
 	{
 		// Add buttons to move across maps
-		back = new FlxButton(5, 5, "prev", function():Void
+		back = new FlxButton(80, 5, "prev", function():Void
 		{
 			Reg.gameWorld.currentLevelIdx = (Reg.currentWorld.levels.length + Reg.gameWorld.currentLevelIdx - 1) % Reg.currentWorld.levels.length;
 			Reg.currentLevel = Reg.currentWorld.levels[Reg.gameWorld.currentLevelIdx];
@@ -791,39 +823,13 @@ class PlayState extends FlxState
 		});
 		add(back);
 		
-		next = new FlxButton(80, 5, "next", function():Void 
+		next = new FlxButton(170, 5, "next", function():Void 
 		{
 			Reg.gameWorld.currentLevelIdx = (Reg.gameWorld.currentLevelIdx + 1) % Reg.currentWorld.levels.length;
 			Reg.currentLevel = Reg.currentWorld.levels[Reg.gameWorld.currentLevelIdx];
 			FlxG.switchState(new PlayState());
 		} );
 		add(next);
-		
-		clearSave = new FlxButton(155, 5, "del. save", function():Void
-		{
-			Reg.gameWorld.clearSave();
-			Reg.gameWorld.currentWorldIdx = 0;
-			Reg.gameWorld.currentLevelIdx = 0;
-			Reg.gameWorld.worldTable[Reg.gameWorld.currentWorldIdx] = new WorldStateEntry();
-			Reg.gameWorld.worldTable[Reg.gameWorld.currentWorldIdx].levelObjectiveTable = new Map<Int,LevelState>();
-			var data:LevelData = Reg.worldDatabase[Reg.gameWorld.currentWorldIdx].levels[Reg.gameWorld.currentLevelIdx];
-			var levelState = new LevelState();
-			var idx:Int = 0;
-			for (objData in data.objectives)
-			{
-				var objState:ObjectiveState = new ObjectiveState();
-				objState.completed = false;
-				objState.bestValue = 0;
-				objState.bestFloat = 0.0;
-				objState.bestSequence.splice(0,objState.bestSequence.length - 1);
-				levelState.objectives.push(objState);
-				hud.playPanel.setGoalRevealed(idx, false, false);
-				idx++;
-			}
-			Reg.gameWorld.worldTable[Reg.gameWorld.currentWorldIdx].levelObjectiveTable[Reg.gameWorld.currentLevelIdx] = levelState;
-			FlxG.switchState(new PlayState());
-		});
-		add(clearSave);
 		
 		stageTxt = new FlxText(5, 30, 0, "stage: " + stageMode, 14);
 		stageTxt.color = FlxColor.WHITE;

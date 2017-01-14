@@ -37,16 +37,18 @@ class GoalsPage extends TabPage
 		var objRef:Array<ObjectiveData> = Reg.currentLevel.objectives;
 		var height:Float = 36;
 		var medalIdx:Int = 0;
-		var offset:Float = 60;
+		var offsetX:Float = 24;
+		var offsetY:Float = 32;
+		var padY: Float = 24;
 		var objStateList:Array<ObjectiveState> = Reg.gameWorld.worldTable[Reg.gameWorld.currentWorldIdx].levelObjectiveTable[Reg.gameWorld.currentLevelIdx].objectives;
 		for (objectiveData in objRef)
 		{
 			var objState:ObjectiveState = objStateList[medalIdx];
 			var revealed:Bool = medalIdx < 2 || objState.completed || objStateList[medalIdx - 1].completed;
-			var obj:GoalPanel = new GoalPanel(5, offset, atlas, medalIdx, objectiveData.getText(), revealed, objState.completed);
+			var obj:GoalPanel = new GoalPanel(offsetX, offsetY, atlas, medalIdx, objectiveData.getText(), revealed, objState.completed);
 			add(obj);	
 			medalIdx++;
-			offset += height;
+			offsetY += height + padY;
 			goals.push(obj);
 		}		
 	}
@@ -65,7 +67,7 @@ class GoalsPage extends TabPage
 	
 	public function updateAllGoals():Void
 	{
-		if (goals != null || goals.length == 0) return;
+		if (goals == null || goals.length == 0) return;
 		
 		var objStateList:Array<ObjectiveState> = Reg.gameWorld.worldTable[Reg.gameWorld.currentWorldIdx].levelObjectiveTable[Reg.gameWorld.currentLevelIdx].objectives;
 		var medalIdx:Int = 0;
@@ -79,7 +81,11 @@ class GoalsPage extends TabPage
 				goal.setRevealed(revealed, objState.completed);
 				medalIdx++;						
 			}	
-		}
-		
+		}		
+	}
+	
+	override public function refreshVisibility():Void
+	{
+		updateAllGoals();
 	}
 }

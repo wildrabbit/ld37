@@ -28,17 +28,19 @@ class StatsPage extends TabPage
 	
 	private function initStatsPanel():Void
 	{
-		var offset:Float = 4;
+		var offsetX:Float = 32;
+		var offsetY:Float = 32;
 		var height:Float = 36;
+		var padding:Float = 4;
 		
 		stats = new Array<StatPanel>();
 
 		var stat:Array<StatType> = [StatType.TILES_TRAVERSED, StatType.TILES_PLACED, StatType.TIME_SPENT];
 		for (st in stat)
 		{
-			var stPanel:StatPanel = new StatPanel(5, offset, atlas, st);
+			var stPanel:StatPanel = new StatPanel(offsetX, offsetY, atlas, st);
 			add(stPanel);
-			offset += height;
+			offsetY += height + padding;
 			stats.push(stPanel);
 		}
 	}

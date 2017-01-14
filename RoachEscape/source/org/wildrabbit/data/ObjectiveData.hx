@@ -27,8 +27,8 @@ class ObjectiveData
 {
 	private static var OBJ_TYPE_TEXTS: Array<String> = [
 		"Reach the goal",
-		"Use at most #IPARAM0# tiles",
-		"Use all the tiles",
+		"Use (and step on) at most #IPARAM0# tiles",
+		"Use (and step on) all the tiles",
 		"Bump less than #IPARAM0# times",
 		"Complete in less than #TPARAM0#",
 		"Step on at least #IPARAM0# tiles",
