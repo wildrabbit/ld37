@@ -14,6 +14,9 @@ import org.wildrabbit.data.ObjectiveData;
 import org.wildrabbit.roach.AssetPaths;
 import org.wildrabbit.roach.states.PlayState;
 import org.wildrabbit.roach.Reg;
+import org.wildrabbit.ui.pages.GoalsPage;
+import org.wildrabbit.ui.pages.SettingsPage;
+import org.wildrabbit.ui.pages.StatsPage;
 import org.wildrabbit.world.GameStats.StatType;
 import org.wildrabbit.world.GameWorldState.ObjectiveState;
 import org.wildrabbit.world.PlaceableItemData;
@@ -55,34 +58,37 @@ class PlayModePanel extends FlxTypedSpriteGroup<FlxSprite>
 	
 	public var specialTitle: FlxText;
 	
-	// Goals
-	private var goals:Array<ObjectivePanel>;
-	// Special stats for level
-	private var stats:Array<StatPanel>;
-	
 	public var button1: ActionButton;
 	public var button2: ActionButton;
 	public var button3:ActionButton;
 	
 	private var atlas: FlxAtlasFrames;
 	
-	private static inline var GOALS_TEXT:String = "GOALS";
-	private static inline var STATS_TEXT:String = "STATS";
+	public var tabWidget: TabWidget;
+	
+	public var statsPage: StatsPage;
+	public var goalsPage: GoalsPage;
+	public var settingsPage: SettingsPage;
+	
+	private static inline var TITLE_TEXT:String = "PLAYBACK";
+	
+	private static inline var PAGE_GOALS:Int = 0;
+	private static inline var PAGE_STATS:Int = 1;
 	
 	private var orientations: Array<PlayOrientationData> = [
 	{
-		titleRect: FlxRect.get(0, 0, 0, 0),
+		titleRect: FlxRect.get(0, 48, 0, 0),
 		specialTitleRect: FlxRect.get(0,350,0,0),
 		statsRect: FlxRect.get(0,0,0,0),
-		pauseRect: FlxRect.get(36,574,168,56),
-		ffRect: FlxRect.get(36, 638, 168, 56),
-		editRect: FlxRect.get(36, 702, 168, 56),
+		pauseRect: FlxRect.get(0,100,68,68),
+		ffRect: FlxRect.get(88, 100, 68, 68),
+		editRect: FlxRect.get(176, 100, 68, 68),
 		baseX: 12,
-		baseY: 91,
+		baseY: 4,
 		buttonWidth: 72,
 		buttonHeight: 96,
 		spaceX:24,
-		spaceY:24,
+		spaceY:16,
 		colour:FlxColor.fromString("#AF980B"),
 		buttonColour:FlxColor.fromRGB(130,0,37),
 		buttonSize:20
@@ -113,16 +119,26 @@ class PlayModePanel extends FlxTypedSpriteGroup<FlxSprite>
 		super(768, 0);
 		this.parent = parent;
 
-		atlas = FlxAtlasFrames.fromTexturePackerJson(AssetPaths.ui__png, AssetPaths.ui__json);
 		var config:PlayOrientationData = orientations[Type.enumIndex(currentOrientation)];
 
-		panelTitle = new FlxText(config.titleRect.x, config.titleRect.y, 256, "", 32);
+		panelTitle = new FlxText(config.titleRect.x, config.titleRect.y, 256, "", 30);
 		panelTitle.alignment = FlxTextAlign.CENTER;
-		panelTitle.text = GOALS_TEXT;
+		panelTitle.text = TITLE_TEXT;
 		add(panelTitle);
 
-		initGoalsPanel();
-		initStatsPanel();
+		//initGoalsPanel();
+		//initStatsPanel();
+		
+		goalsPage = new GoalsPage(parent);
+		statsPage = new StatsPage(parent);
+		settingsPage = new SettingsPage(parent);
+		
+		tabWidget = new TabWidget(0, 210);
+		add(tabWidget);
+		tabWidget.addPage(UIAtlasNames.ICON_GOALS, "GOALS", goalsPage);
+		tabWidget.addPage(UIAtlasNames.ICON_STATS, "STATS", statsPage);
+		tabWidget.addPage(UIAtlasNames.ICON_SETTINGS, "SETTINGS", settingsPage);
+		tabWidget.setPage(0);
 
 		button1 = initButton(config.pauseRect, onPauseToggle, config.buttonColour, AssetPaths.pause__png);		
 		button2 = initButton(config.ffRect, onFastForward, config.buttonColour, AssetPaths.fastforward__png);		
@@ -137,48 +153,6 @@ class PlayModePanel extends FlxTypedSpriteGroup<FlxSprite>
 		return btn;
 	}
 	
-	private function initGoalsPanel():Void 
-	{
-		goals = new Array<ObjectivePanel>();
-		
-		var objRef:Array<ObjectiveData> = Reg.currentLevel.objectives;
-		var height:Float = 36;
-		var medalIdx:Int = 0;
-		var offset:Float = 60;
-		var objStateList:Array<ObjectiveState> = Reg.gameWorld.worldTable[Reg.gameWorld.currentWorldIdx].levelObjectiveTable[Reg.gameWorld.currentLevelIdx].objectives;
-		for (objectiveData in objRef)
-		{
-			var objState:ObjectiveState = objStateList[medalIdx];
-			var revealed:Bool = medalIdx < 2 || objState.completed || objStateList[medalIdx - 1].completed;
-			var obj:ObjectivePanel = new ObjectivePanel(5, offset, atlas, medalIdx, objectiveData.getText(), revealed, objState.completed);
-			add(obj);	
-			medalIdx++;
-			offset += height;
-			goals.push(obj);
-		}		
-	}
-	
-	private function initStatsPanel():Void
-	{
-		var config:PlayOrientationData = orientations[Type.enumIndex(currentOrientation)];
-		specialTitle = new FlxText(config.specialTitleRect.x, config.specialTitleRect.y, 256, "", 32);
-		specialTitle.alignment = FlxTextAlign.CENTER;
-		specialTitle.text = STATS_TEXT;
-		add(specialTitle);
-		var offset:Float = 400;
-		var height:Float = 36;
-		
-		stats = new Array<StatPanel>();
-
-		var stat:Array<StatType> = [StatType.TILES_TRAVERSED, StatType.TILES_PLACED, StatType.TIME_SPENT];
-		for (st in stat)
-		{
-			var stPanel:StatPanel = new StatPanel(5, offset, atlas, st);
-			add(stPanel);
-			offset += height;
-			stats.push(stPanel);
-		}
-	}
 	//-----------------------------------
 	public function onPauseToggle():Void 
 	{
@@ -202,10 +176,7 @@ class PlayModePanel extends FlxTypedSpriteGroup<FlxSprite>
 	{
 		parent.playPressed();
 		FlxG.sound.play(AssetPaths.play__wav);
-		for (stat in stats)
-		{
-			stat.resetScale();
-		}
+		statsPage.resetScale();
 	}
 	
 	public function onMenu():Void
@@ -230,17 +201,9 @@ class PlayModePanel extends FlxTypedSpriteGroup<FlxSprite>
 		visible = true;
 		active = true;
 		
-		var objStateList:Array<ObjectiveState> = Reg.gameWorld.worldTable[Reg.gameWorld.currentWorldIdx].levelObjectiveTable[Reg.gameWorld.currentLevelIdx].objectives;
-		var medalIdx:Int = 0;
+		tabWidget.setPage(PAGE_STATS);
 		
-		for (goal in goals)
-		{
-			var objState:ObjectiveState = objStateList[medalIdx];
-			var revealed:Bool = medalIdx < 2 || objState.completed || objStateList[medalIdx - 1].completed;
-			goal.setRevealed(revealed, objState.completed);
-			medalIdx++;						
-		}						
-
+		goalsPage.updateAllGoals();						
 		// update action buttons:
 		button1.updateBehaviour(AssetPaths.pause__png, onPauseToggle);
 		button2.updateBehaviour(AssetPaths.fastforward__png, onFastForward);
@@ -249,6 +212,7 @@ class PlayModePanel extends FlxTypedSpriteGroup<FlxSprite>
 	
 	public function goToGameLost():Void
 	{
+		tabWidget.setPage(PAGE_GOALS);
 		// update action buttons:
 		button1.updateBehaviour(AssetPaths.play__png, onPlay);
 		button2.updateBehaviour(AssetPaths.menu__png, onMenu);
@@ -257,6 +221,7 @@ class PlayModePanel extends FlxTypedSpriteGroup<FlxSprite>
 	
 	public function goToGameWon():Void
 	{
+		tabWidget.setPage(PAGE_GOALS);
 		button1.updateBehaviour(AssetPaths.next__png, onNextLevel);
 		button2.updateBehaviour(AssetPaths.play__png, onPlay);
 		button3.updateBehaviour(AssetPaths.build__png, onEdit);
@@ -268,22 +233,20 @@ class PlayModePanel extends FlxTypedSpriteGroup<FlxSprite>
 		button2.updateBehaviour(AssetPaths.menu__png, onMenu);
 		button3.updateBehaviour(AssetPaths.build__png, onEdit);
 	}
+
+	
+	public function playStatFail(type:StatType):Void
+	{
+		statsPage.playFail(type);
+	}
 	
 	public function updateObjective(idx:Int, completed:Bool):Void
 	{
-		var revealed:Bool = goals[idx].tickBox.visible;
-		goals[idx].setRevealed(completed ? true : revealed, completed);		
+		goalsPage.updateObjective(idx, completed);
 	}
 	
 	public function setGoalRevealed(idx:Int, revealed:Bool, completed:Bool):Void
 	{
-		goals[idx].setRevealed(revealed, completed);
-	}
-	
-	public function playStatFail(type:StatType):Void
-	{
-		var stPanel:StatPanel = stats[Type.enumIndex(type)];
-		if (stPanel == null) return;
-		stPanel.playFail();
+		goalsPage.setGoalRevealed(idx, revealed, completed);
 	}
 }

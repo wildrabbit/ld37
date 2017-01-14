@@ -3,14 +3,17 @@ package org.wildrabbit.ui;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup;
+import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 import org.wildrabbit.roach.AssetPaths;
 import org.wildrabbit.roach.states.PlayState;
+import org.wildrabbit.ui.pages.GoalsPage;
+import org.wildrabbit.ui.pages.SettingsPage;
+import org.wildrabbit.ui.pages.TilesPage;
 import org.wildrabbit.world.PlaceableItemData;
-
 import org.wildrabbit.ui.Orientation;
 
 typedef EditOrientationData = 
@@ -36,7 +39,7 @@ typedef EditOrientationData =
 class EditModePanel extends FlxTypedSpriteGroup<FlxSprite>
 {
 	private static inline var MAX_BUTTONS:Int = 4;
-	private static inline var TOOLS_TEXT:String = "TOOLS";
+	private static inline var TOOLS_TEXT:String = "PLAYBACK";
 	
 	private var parent:PlayState;
 	
@@ -49,15 +52,21 @@ class EditModePanel extends FlxTypedSpriteGroup<FlxSprite>
 	public var menuButton:ActionButton;
 	
 	public var borderSprite:FlxSprite;
+	
+	public var tabWidget: TabWidget;
+	
+	public var tilesPage: TilesPage;
+	public var goalsPage: GoalsPage;
+	public var settingsPage: SettingsPage;
 
 	
 	private var orientations: Array<EditOrientationData> = [
 		{
-			toolsRect: FlxRect.get(0, 0, 0, 0),
+			toolsRect: FlxRect.get(0, 48, 0, 0),
 			toolsVertical: false,
-			playRect: FlxRect.get(36,574,168,56),
-			clearRect: FlxRect.get(36, 638, 168, 56),
-			menuRect: FlxRect.get(36, 702, 168, 56),
+			playRect: FlxRect.get(0,100,68,68),
+			clearRect: FlxRect.get(88, 100, 68, 68),
+			menuRect: FlxRect.get(176, 100, 68, 68),
 			baseX: 32,
 			baseY: 91,
 			buttonWidth: 72,
@@ -69,7 +78,7 @@ class EditModePanel extends FlxTypedSpriteGroup<FlxSprite>
 			buttonSize:20,
 		},
 		{
-			toolsRect: FlxRect.get(0, 0, 0, 0),
+			toolsRect: FlxRect.get(0, 16, 0, 0),
 			toolsVertical: true,
 			playRect: FlxRect.get(36,574,168,56),
 			clearRect: FlxRect.get(36, 638, 168, 56),
@@ -101,6 +110,7 @@ class EditModePanel extends FlxTypedSpriteGroup<FlxSprite>
 		{
 			toolsText = new FlxText(config.toolsRect.x, config.toolsRect.y, 256, "", 30);
 			toolsText.alignment = FlxTextAlign.CENTER;
+			toolsText.font = AssetPaths.small_text__TTF;
 			toolsText.text = TOOLS_TEXT;
 		}
 		else
@@ -115,21 +125,20 @@ class EditModePanel extends FlxTypedSpriteGroup<FlxSprite>
 		}
 		add(toolsText);
 		
-		tools = new Array<ToolButton>();
-		
-		for (i in 0...MAX_BUTTONS)
-		{
-			var clickBtn: Void -> Void = onToolClickBtn.bind(i);
-			tools[i] = new ToolButton(config.baseX + (i % 2) * (config.spaceX + config.buttonWidth), config.baseY + Math.floor(i / 2) * (config.spaceY +  config.buttonHeight), "??", clickBtn);
-			tools[i].resetGraphic(config.buttonWidth, config.buttonHeight, config.colour);
-			add(tools[i]);
-		}
-		
 		playButton = initButton(config.playRect, onPlayButton, config.buttonColour, AssetPaths.play__png);
-		
 		clearButton = initButton(config.clearRect, onClearButton, config.buttonColour, AssetPaths.clear__png);
-		
 		menuButton = initButton( config.menuRect, onMenuButton, config.buttonColour, AssetPaths.menu__png);
+		
+		tilesPage = new TilesPage(parent, config);
+		goalsPage = new GoalsPage(parent);
+		settingsPage = new SettingsPage(parent);
+		
+		tabWidget = new TabWidget(0, 210);
+		add(tabWidget);
+		tabWidget.addPage(UIAtlasNames.ICON_TILES, "TILES", tilesPage);
+		tabWidget.addPage(UIAtlasNames.ICON_GOALS, "GOALS", goalsPage);
+		tabWidget.addPage(UIAtlasNames.ICON_SETTINGS, "SETTINGS", settingsPage);
+		tabWidget.setPage(0);
 	}
 	
 	private function initButton(rect:FlxRect, callback:Void->Void, bgColour:FlxColor,icon:Dynamic):ActionButton
@@ -138,12 +147,6 @@ class EditModePanel extends FlxTypedSpriteGroup<FlxSprite>
 		btn.build(rect,bgColour, icon, callback);
 		add(btn);
 		return btn;
-	}
-	
-	public function onToolClickBtn(i:Int):Void 
-	{
-		parent.toggleTool(i);
-		FlxG.sound.play(AssetPaths.select__wav);
 	}
 	
 	public function onPlayButton():Void
@@ -164,49 +167,13 @@ class EditModePanel extends FlxTypedSpriteGroup<FlxSprite>
 		//FlxG.sound.play(AssetPaths.select__wav);
 	}
 	
-	public function buildToolButtons(btnInfo:Array<PlaceableItemTool>, library:Map<Int,PlaceableItemData>):Void
-	{
-		var config:EditOrientationData = orientations[Type.enumIndex(currentOrientation)];
-		var numberAvailable: Int = btnInfo.length;
-		for (i in 0...numberAvailable)
-		{
-			var placeableItemData:PlaceableItemData = library.get(btnInfo[i].id);
-			var s:String = placeableItemData.btnName;			
-			var amount:Int = btnInfo[i].amount;
-			tools[i].setToolData(placeableItemData.spritePath, placeableItemData.spriteAnims, s, amount);
-			if (!tools[i].baseButton.active)
-			{
-				tools[i].baseButton.active = true;
-			}
-		}
-		
-		for (i in numberAvailable...MAX_BUTTONS)
-		{
-			if (tools[i].baseButton.active)
-			{
-				tools[i].resetGraphic(config.buttonWidth, config.buttonHeight, config.colour);
-				tools[i].baseButton.active = false;
-			}
-		}
-	}
-	
-	public function updateTool(i:Int, newAmount:Int):Void
-	{
-		if (tools[i] != null)
-		{
-			tools[i].txt.text = Std.string(newAmount);			
-		}
-	}
 	
 	public function goToEdit():Void
 	{
 		active = true;
 		visible = true;
 		
-		for (i in 0...tools.length)
-		{
-			tools[i].baseButton.active = true;
-		}
+		tabWidget.setActivePageEnabled(true);
 	}
 	
 	public function goToPlay():Void
@@ -214,9 +181,31 @@ class EditModePanel extends FlxTypedSpriteGroup<FlxSprite>
 		active = false;
 		visible = false;
 		
-		for (i in 0...tools.length)
-		{
-			tools[i].baseButton.active = false;
-		}
+		tabWidget.setActivePageEnabled(false);
+	}
+	
+	public function updateToolPage(idx:Int, amount:Int):Void
+	{
+		tilesPage.updateTool(idx, amount);
+	}
+	
+	public function buildTools(btnInfo:Array<PlaceableItemTool>, library:Map<Int,PlaceableItemData>):Void
+	{
+		tilesPage.buildToolButtons(btnInfo, library);
+	}
+	
+	public function getToolMidpoint(idx:Int, point:FlxPoint):Void
+	{
+		tilesPage.getToolMidpoint(idx, point);
+	}
+	
+	public function deselectTool():Void
+	{
+		tilesPage.deselect();
+	}
+	
+	public function selectTool(idx:Int):Void
+	{
+		tilesPage.select(idx);
 	}
 }

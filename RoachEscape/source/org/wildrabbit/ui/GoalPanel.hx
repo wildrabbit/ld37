@@ -11,7 +11,7 @@ import org.wildrabbit.roach.AssetPaths;
  * ...
  * @author ith1ldin
  */
-class ObjectivePanel extends FlxSpriteGroup
+class GoalPanel extends FlxSpriteGroup
 {
 	// TODO: Rename the images to proper, meaningful names! (or refactor this into a loop using ui_icons_XXX
 	private static var MEDALS:Array<String> = [UIAtlasNames.MEDAL_BRONZE, UIAtlasNames.MEDAL_SILVER, UIAtlasNames.MEDAL_GOLD]; 
@@ -28,26 +28,23 @@ class ObjectivePanel extends FlxSpriteGroup
 		super(x, y);
 		
 		medal = new FlxSprite(0, 0);
-		medal.frames = atlas;
-		medal.animation.frameName = MEDALS[medalType];
+		medal.frame = atlas.getByName(MEDALS[medalType]);
 		add(medal);
 		
 		objMessage = objText;
-		description = new FlxText(medal.width + 4, 0, TEXT_WIDTH, revealed? objText : "??????", 16);
+		description = new FlxText(medal.frameWidth + 4, 0, TEXT_WIDTH, revealed? objText : "??????", 16);
 		description.font = AssetPaths.small_text__TTF;
 		description.wordWrap = true;
 		add(description);
 		
-		var totalW:Float = medal.width + 4 + TEXT_WIDTH;
+		var totalW:Float = medal.frameWidth + 4 + TEXT_WIDTH;
 		
 		tickBox = new FlxSprite(totalW, 0);
-		tickBox.frames = atlas;
-		tickBox.animation.frameName = UIAtlasNames.TICK_BOX;
+		tickBox.frame = atlas.getByName(UIAtlasNames.TICK_BOX);
 		add(tickBox);
 		
 		tick = new FlxSprite(totalW, 0);
-		tick.frames = atlas;
-		tick.animation.frameName = UIAtlasNames.TICK;
+		tick.frame = atlas.getByName(UIAtlasNames.TICK);
 		add(tick);
 		setRevealed(revealed, completed);
 	}

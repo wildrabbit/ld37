@@ -103,8 +103,7 @@ class PlayState extends FlxState
 	private var toolTxt:FlxText;
 	private var lvTxt:FlxText;
 #end	
-	private var select:FlxSprite;
-
+	
 	public var player:Player;
 	public var goal:Goal;
 	
@@ -176,10 +175,9 @@ class PlayState extends FlxState
 		
 		resetToolLoadout();
 		
-		select = new FlxSprite(0, 0, AssetPaths.select__png);
-	
+		
 		hud = new HUD(this);
-		hud.editPanel.buildToolButtons(currentTools, toolLibrary);
+		hud.editPanel.buildTools(currentTools, toolLibrary);
 		hud.onStageModeChanged(stageMode);
 		add(hud);
 		
@@ -318,7 +316,7 @@ class PlayState extends FlxState
 								if (currentTools[i].id == templateID && currentTools[i].amount < Reg.currentLevel.loadouts[i].amount)
 								{
 									currentTools[i].amount++;
-									hud.editPanel.updateTool(i, currentTools[i].amount);
+									hud.editPanel.updateToolPage(i, currentTools[i].amount);
 								}
 							}
 							gameContainer.removePlaceableItem(entity);
@@ -408,7 +406,7 @@ class PlayState extends FlxState
 		item.setRelativePos(newCoords.x, newCoords.y);
 		newCoords.put();
 		currentTools[selectedToolIdx].amount--;
-		hud.editPanel.updateTool(selectedToolIdx, currentTools[selectedToolIdx].amount);
+		hud.editPanel.updateToolPage(selectedToolIdx, currentTools[selectedToolIdx].amount);
 		gameContainer.addToPlaceableLayer(item);
 		actors.push(item);
 	}
@@ -423,23 +421,17 @@ class PlayState extends FlxState
 			if (selectedToolIdx == i || tool.amount == 0)
 			{
 				selectedToolIdx = -1;
-				remove(select);
+				hud.editPanel.deselectTool();
 			}
 			else 
 			{
-				selectedToolIdx = i;
-				add(select);				
-				var pos:FlxPoint = hud.editPanel.tools[i].getMidpoint();
-				pos.subtract(select.width / 2, select.height / 2);
-				select.setPosition(pos.x, pos.y);
-				FlxTween.tween(select.scale, { x:1.1, y:1.1}, 0.5, { type:FlxTween.PINGPONG } );
-				pos.put();
-			}			
-			
+				selectedToolIdx = i;				
+				hud.editPanel.selectTool(selectedToolIdx);								
+			}						
 		}
 		else 
 		{
-			remove(select);
+			hud.editPanel.deselectTool();
 		}
 	}
 	
@@ -468,7 +460,7 @@ class PlayState extends FlxState
 		resetToolLoadout();
 		for (i in 0...currentTools.length)
 		{
-			hud.editPanel.updateTool(i, currentTools[i].amount);
+			hud.editPanel.updateToolPage(i, currentTools[i].amount);
 		}
 	}
 	public function resetPressed(): Void 
@@ -564,7 +556,7 @@ class PlayState extends FlxState
 				openSubState(t);
 				
 				resetTimescale();
-				remove(select);
+				hud.editPanel.deselectTool();
 				gameContainer.removeFromSpriteLayer(playerTrail, GameContainer.SPRITE_PLAYER_BG_IDX);
 				// Clear everything
 				for (a in actors) { a.resetToDefaults();}
@@ -572,7 +564,7 @@ class PlayState extends FlxState
 			case StageMode.PLAY:
 			{
 				selectedToolIdx = -1;
-				remove(select);
+				hud.editPanel.deselectTool();
 				if (stageMode != PAUSE)
 				{
 					for (a in actors) { a.resetToDefaults();}
@@ -593,7 +585,7 @@ class PlayState extends FlxState
 			{
 				resetTimescale(true);
 				selectedToolIdx = -1;
-				remove(select);
+				hud.editPanel.deselectTool();
 				for (a in actors) { a.pause(true); }
 				gameContainer.removeFromSpriteLayer(playerTrail, GameContainer.SPRITE_PLAYER_BG_IDX);
 				
@@ -604,7 +596,7 @@ class PlayState extends FlxState
 			{
 				resetTimescale();
 				selectedToolIdx = -1;
-				remove(select);
+				hud.editPanel.deselectTool();
 				gameContainer.removeFromSpriteLayer(playerTrail, GameContainer.SPRITE_PLAYER_BG_IDX);
 				for (a in actors) { a.pause(true);}
 					

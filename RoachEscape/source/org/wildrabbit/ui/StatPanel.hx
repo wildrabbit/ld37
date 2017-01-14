@@ -39,8 +39,7 @@ class StatPanel extends FlxSpriteGroup
 		this.statType = statType;
 		
 		icon = new FlxSprite(0, 0);
-		icon.frames = atlas;
-		icon.animation.frameName = STAT_ICONS[Type.enumIndex(statType)];
+		icon.frame = atlas.getByName(STAT_ICONS[Type.enumIndex(statType)]);
 		icon.origin.set(icon.frameWidth/ 2, icon.frameHeight/ 2);
 		add(icon);
 		

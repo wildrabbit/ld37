@@ -18,4 +18,9 @@ class UIAtlasNames
 	public static inline var MEDAL_BRONZE:String = "medal_bronze.png";
 	public static inline var MEDAL_GOLD:String = "medal_gold.png";
 	public static inline var MEDAL_SILVER:String = "medal_silver.png";	
+	
+	public static inline var ICON_GOALS:String = "icon_goals.png";	
+	public static inline var ICON_STATS:String = "icon_stats.png";
+	public static inline var ICON_TILES:String = "icon_tiles.png";	
+	public static inline var ICON_SETTINGS:String = "icon_settings.png";	
 }
