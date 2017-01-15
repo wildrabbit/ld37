@@ -131,7 +131,7 @@ class EditModePanel extends FlxTypedSpriteGroup<FlxSprite>
 		
 		playButton = initButton(config.playRect, onPlayButton, config.buttonColour, AssetPaths.play__png);
 		clearButton = initButton(config.clearRect, onClearButton, config.buttonColour, AssetPaths.clear__png);
-		menuButton = initButton( config.menuRect, onMenuButton, config.buttonColour, AssetPaths.menu__png);
+		menuButton = initButton( config.menuRect, onMenuButton, FlxColor.GRAY, AssetPaths.menu__png);
 		
 		tilesPage = new TilesPage(parent, config);
 		goalsPage = new GoalsPage(parent);

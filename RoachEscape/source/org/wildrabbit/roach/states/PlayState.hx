@@ -612,7 +612,7 @@ class PlayState extends FlxState
 					// Evaluate objectives:
 					var worldTable: WorldStateEntry = Reg.gameWorld.worldTable[Reg.gameWorld.currentWorldIdx];
 					var levelState: LevelState = worldTable.levelObjectiveTable[Reg.gameWorld.currentLevelIdx];
-					
+					var victoryPopupInfo:Array<Int> = new Array<Int>();
 					var objectives:Array<ObjectiveData> = Reg.currentLevel.objectives;
 					var idx:Int = 0;
 					for (objective in objectives)
@@ -681,6 +681,7 @@ class PlayState extends FlxState
 							objectiveState.completed = true;
 							var revealed:Bool = idx < 2 || objectiveState.completed || levelState.objectives[idx - 1].completed;
 							hud.playPanel.setGoalRevealed(idx, revealed, objectiveState.completed);
+							victoryPopupInfo.push(idx);
 						}
 						objectiveState.bestValue = bestInt;
 						objectiveState.bestFloat = bestFloat;
@@ -702,14 +703,14 @@ class PlayState extends FlxState
 					//Victory popup
 					var popup:VictoryPopup = new VictoryPopup();
 					add(popup);	
-					popup.start();
+					popup.start(victoryPopupInfo);
 				}
 				else
 				{
 					//Defeat popup
 					var popup:DefeatPopup= new DefeatPopup();
 					add(popup);
-					popup.start();
+					popup.start(result);
 				}	
 				Reg.gameWorld.save();
 			}			

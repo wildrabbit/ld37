@@ -54,27 +54,15 @@ class DefeatPopup extends FlxSpriteGroup
 		popupBg.makeGraphic(512, 416, FlxColor.BLACK);
 		container.add(popupBg);
 		
-		// TODO: Deco + roachie
+		popupDeco = new FlxSprite(128, 310, AssetPaths.popup_deco__png);
+		container.add(popupDeco);
+		
+		roachie = new FlxSprite(352, 310, AssetPaths.roachie_lose__png);
 		
 		title = new FlxText(128, 212, 512, TITLE_TEXT,48);				
 		title.alignment = FlxTextAlign.CENTER;
-		container.add(title);
 		
 		buttons = new Array<ActionButton>();
-		
-		var btnStart:FlxPoint = new FlxPoint(230, 508);
-		var btnWidth:Float = 146;
-		var btnHeight = 56;
-		var btnSpace:Float = 16;
-		for (i in 0...NUM_BUTTONS)
-		{
-			buttons.push(new ActionButton(btnStart.x, btnStart.y));			
-			btnStart.x += (btnWidth + btnSpace);
-			container.add(buttons[buttons.length - 1]);
-		}
-		
-		buttons[BTN_EDIT].build(FlxRect.weak(0, 0, btnWidth, btnHeight), FlxColor.fromRGB(130, 0, 37), AssetPaths.build__png, onEditClick);
-		buttons[BTN_MENU].build(FlxRect.weak(0, 0, btnWidth, btnHeight), FlxColor.fromRGB(130, 0, 37), AssetPaths.menu__png, onMenuClick);
 	}
 	
 	public function onEditClick():Void
@@ -93,9 +81,51 @@ class DefeatPopup extends FlxSpriteGroup
 		trace("Menu!");
 	}
 	
-	public function start():Void
+	public function start(result:Result):Void
 	{
-		container.scale.set(0.25, 0.25);
-		var t:FlxTween = FlxTween.tween(container.scale, { "x": 1, "y":1 }, 0.35, { type:FlxTween.ONESHOT, ease:FlxEase.backOut, onComplete:null} );
+		popupBg.scale.set(0.25, 0.25);
+		var t:FlxTween = FlxTween.tween(popupBg.scale, { "x": 1, "y":1 }, 0.35, { type:FlxTween.ONESHOT, ease:FlxEase.backOut, onComplete:onIntroAnimFinished } );
+		
+		popupDeco.scale.set(0.25, 0.25);
+		var t:FlxTween = FlxTween.tween(popupDeco.scale, { "x": 1, "y":1 }, 0.35, { type:FlxTween.ONESHOT, ease:FlxEase.backOut } );
+		
+		popupInfo = new FlxText(184, 400, 400, getDefeatText(result), 32);
+		popupInfo.color = FlxColor.WHITE;
+		popupInfo.font = AssetPaths.small_text__TTF;
+		popupInfo.alignment = FlxTextAlign.CENTER;
+	}
+	
+	public function onIntroAnimFinished(t:FlxTween):Void
+	{
+		container.add(title);
+		container.add(roachie);
+		container.add(popupInfo);
+
+		var btnStart:FlxPoint = new FlxPoint(230, 508);
+		var btnWidth:Float = 146;
+		var btnHeight = 56;
+		var btnSpace:Float = 16;
+		for (i in 0...NUM_BUTTONS)
+		{
+			buttons.push(new ActionButton(btnStart.x, btnStart.y));			
+			btnStart.x += (btnWidth + btnSpace);
+			container.add(buttons[buttons.length - 1]);
+		}
+		
+		buttons[BTN_EDIT].build(FlxRect.weak(0, 0, btnWidth, btnHeight), FlxColor.fromRGB(130, 0, 37), AssetPaths.build__png, onEditClick);
+		buttons[BTN_MENU].build(FlxRect.weak(0, 0, btnWidth, btnHeight), FlxColor.fromRGB(128, 128, 128), AssetPaths.menu__png, onMenuClick);
+	}
+	
+	public function getDefeatText(result:Result):String
+	{
+		if (result == Result.DIED)
+		{
+			return "You died!";
+		}
+		else if (result == Result.TIMEDOUT)
+		{
+			return "What took you so long?";
+		}
+		else return "";
 	}
 } 
