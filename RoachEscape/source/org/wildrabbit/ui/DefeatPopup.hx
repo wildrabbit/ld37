@@ -91,7 +91,7 @@ class DefeatPopup extends FlxSpriteGroup
 		
 		popupInfo = new FlxText(184, 400, 400, getDefeatText(result), 32);
 		popupInfo.color = FlxColor.WHITE;
-		popupInfo.font = AssetPaths.small_text__TTF;
+		popupInfo.font = AssetPaths.small_text__ttf;
 		popupInfo.alignment = FlxTextAlign.CENTER;
 	}
 	

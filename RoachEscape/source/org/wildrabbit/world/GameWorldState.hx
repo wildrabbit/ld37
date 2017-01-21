@@ -1,5 +1,6 @@
 package org.wildrabbit.world;
 import flixel.util.FlxSave;
+import flixel.util.FlxTimer;
 import org.wildrabbit.roach.Reg;
 
 
@@ -93,7 +94,7 @@ class GameWorldState
 		currentLevelIdx = saveFile.data.levelIdx;
 		
 		// TODO: Replace with worldTable.destroy(); worldTable = null;
-		
+				
 		worldTable = null;
 		worldTable = new Map<Int,WorldStateEntry>();
 		var saveData:Array<WorldSaveEntry> = saveFile.data.worldTable;
@@ -130,7 +131,7 @@ class GameWorldState
 				worldState.levelObjectiveTable[levelSave.id] = levelState;
 			}			
 			worldTable[iKey] = worldState;
-		}		
+		}
 	}
 	
 	public function save():Void
@@ -162,12 +163,16 @@ class GameWorldState
 		}
 		saveFile.data.worldTable = saveTable;
 		saveFile.flush();
+		saveFile.close();
 	}
 	
 	public function clearSave():Void
 	{
 		saveFile.bind(SAVE_SLOT);
-		saveFile.erase();
-		saveFile.flush();
+		trace(saveFile.data);
+		new FlxTimer().start(1, function clear(t:FlxTimer):Void {
+			saveFile.erase();
+			saveFile.close();			
+		});
 	}
 }

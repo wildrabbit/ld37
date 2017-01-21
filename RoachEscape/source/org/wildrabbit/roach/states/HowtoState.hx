@@ -115,7 +115,7 @@ class HowtoState extends FlxState
 				add(msg);
 				t = FlxTween.tween(msg.scale, { x:1.15, y:1.15 }, 0.7, { type:FlxTween.PINGPONG } );*/
 				skipText = new FlxText(700, 700, 368, "Press any key to skip...", 20);
-				skipText.font = AssetPaths.small_text__TTF;
+				skipText.font = AssetPaths.small_text__ttf;
 				skipText.color = FlxColor.WHITE;		
 				FlxTween.color(skipText, 0.8, FlxColor.WHITE, FlxColor.BLACK, { type:FlxTween.PINGPONG } );
 				add(skipText);				
@@ -153,7 +153,7 @@ class HowtoState extends FlxState
 	private function startStage2(t:FlxTimer):Void
 	{
 		text = new FlxText(290, 192, 300, TEXT_1, 20);
-		text.font = AssetPaths.small_text__TTF;
+		text.font = AssetPaths.small_text__ttf;
 		text.color = FlxColor.WHITE;
 		add(text);
 			
@@ -385,9 +385,6 @@ class HowtoState extends FlxState
 	
 	private function finishHowto(?t:FlxTimer):Void
 	{
-		Reg.gameWorld.currentWorldIdx = Reg.gameWorld.currentLevelIdx = 0;
-		Reg.currentWorld = Reg.worldDatabase[Reg.gameWorld.currentWorldIdx];
-		Reg.currentLevel = Reg.currentWorld.levels[Reg.gameWorld.currentLevelIdx];
 		FlxG.sound.play(AssetPaths.play__wav);
 		FlxG.switchState(new PlayState());
 	}

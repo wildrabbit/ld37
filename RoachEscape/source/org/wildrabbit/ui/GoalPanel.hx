@@ -33,7 +33,7 @@ class GoalPanel extends FlxSpriteGroup
 		
 		objMessage = objText;
 		description = new FlxText(medal.frameWidth + 4, 0, TEXT_WIDTH, revealed? objText : "??????", 16);
-		description.font = AssetPaths.small_text__TTF;
+		description.font = AssetPaths.small_text__ttf;
 		description.wordWrap = true;
 		add(description);
 		

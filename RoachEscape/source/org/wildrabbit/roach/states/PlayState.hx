@@ -789,6 +789,7 @@ class PlayState extends FlxState
 	
 	public function resetSave():Void
 	{
+		
 		Reg.gameWorld.clearSave();
 		Reg.gameWorld.currentWorldIdx = 0;
 		Reg.gameWorld.currentLevelIdx = 0;
@@ -810,6 +811,7 @@ class PlayState extends FlxState
 			idx++;
 		}
 		Reg.gameWorld.worldTable[Reg.gameWorld.currentWorldIdx].levelObjectiveTable[Reg.gameWorld.currentLevelIdx] = levelState;
+		Reg.gameWorld.save();
 		FlxG.switchState(new PlayState());
 	}
 #if debug

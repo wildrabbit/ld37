@@ -44,7 +44,7 @@ class StatPanel extends FlxSpriteGroup
 		add(icon);
 		
 		counter = new FlxText(40, 8, 160, "", 16);
-		counter.font = AssetPaths.small_text__TTF;
+		counter.font = AssetPaths.small_text__ttf;
 		counter.wordWrap = true;
 		counter.origin.set(counter.width/ 2, counter.height / 2);
 		add(counter);	

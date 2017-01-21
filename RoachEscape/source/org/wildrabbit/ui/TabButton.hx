@@ -42,7 +42,7 @@ class TabButton extends FlxSpriteGroup
 		img.y = (button.height - img.frameHeight) / 2;
 		add(img);
 		
-		button.label.font = AssetPaths.small_text__TTF;
+		button.label.font = AssetPaths.small_text__ttf;
 		button.label.fieldWidth = 72;
 		button.label.alignment = FlxTextAlign.CENTER;
 		button.label.color = FlxColor.WHITE;

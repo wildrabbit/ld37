@@ -114,7 +114,7 @@ class EditModePanel extends FlxTypedSpriteGroup<FlxSprite>
 		{
 			toolsText = new FlxText(config.toolsRect.x, config.toolsRect.y, 256, "", 30);
 			toolsText.alignment = FlxTextAlign.CENTER;
-			toolsText.font = AssetPaths.small_text__TTF;
+			toolsText.font = AssetPaths.small_text__ttf;
 			toolsText.text = TOOLS_TEXT;
 		}
 		else

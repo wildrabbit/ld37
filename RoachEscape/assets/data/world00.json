@@ -31,8 +31,8 @@
 			{"id":1,"type":1,"value":1,"paramId":0,"sequence":[]},
 			{"id":2,"type":2,"value":0,"paramId":0,"sequence":[]}
 		],
-		"maxTiles":999,
-		"maxTime":60
+		"maxTiles":30,
+		"maxTime":10
 	}, 	
 	{
 	"id":2,
@@ -48,25 +48,25 @@
 		{"id":1,"type":1,"value":3,"paramId":0,"sequence":[]},
 		{"id":2,"type":2,"value":0,"paramId":0,"sequence":[]}
 	],
-	"maxTiles":999,
-	"maxTime":60
+	"maxTiles":120,
+	"maxTime":30
 	}, 
 	{
 	"id":3,
 	"file":"level3.tmx",
 	"loadouts":[
 		{"id":0,"amount":2},
-		{"id":1,"amount":2},
+		{"id":1,"amount":1},
 		{"id":2,"amount":2},
 		{"id":3,"amount":2}
 	],
 	"objectives":[
 		{"id":0,"type":0,"value":0,"paramId":0,"sequence":[]},
-		{"id":1,"type":1,"value":5,"paramId":0,"sequence":[]},
+		{"id":1,"type":1,"value":4,"paramId":0,"sequence":[]},
 		{"id":2,"type":2,"value":0,"paramId":0,"sequence":[]}
 	],
-	"maxTiles":999,
-	"maxTime":60
+	"maxTiles":120,
+	"maxTime":30
 	}, 
 	{
 	"id":4,
@@ -79,11 +79,11 @@
 	],
 	"objectives":[
 		{"id":0,"type":0,"value":0,"paramId":0,"sequence":[]},
-		{"id":1,"type":1,"value":5,"paramId":0,"sequence":[]},
+		{"id":1,"type":1,"value":6,"paramId":0,"sequence":[]},
 		{"id":2,"type":2,"value":0,"paramId":0,"sequence":[]}
 	],
-	"maxTiles":999,
-	"maxTime":60
+	"maxTiles":50,
+	"maxTime":20
 	}, 
 	{
 	"id":5,
@@ -96,11 +96,11 @@
 	],
 	"objectives":[
 		{"id":0,"type":0,"value":0,"paramId":0,"sequence":[]},
-		{"id":1,"type":1,"value":5,"paramId":0,"sequence":[]},
-		{"id":2,"type":2,"value":0,"paramId":0,"sequence":[]}
+		{"id":1,"type":6,"value":20,"paramId":0,"sequence":[]},
+		{"id":2,"type":5,"value":35,"paramId":0,"sequence":[]}
 	],
-	"maxTiles":999,
-	"maxTime":60
+	"maxTiles":60,
+	"maxTime":20
 	},
 	{
 	"id":6,
@@ -109,15 +109,32 @@
 		{"id":0,"amount":2},
 		{"id":1,"amount":2},
 		{"id":2,"amount":2},
-		{"id":3,"amount":2}
+		{"id":3,"amount":3}
 	],
 	"objectives":[
 		{"id":0,"type":0,"value":0,"paramId":0,"sequence":[]},
-		{"id":1,"type":1,"value":5,"paramId":0,"sequence":[]},
+		{"id":1,"type":1,"value":4,"paramId":0,"sequence":[]},
 		{"id":2,"type":2,"value":0,"paramId":0,"sequence":[]}
 	],
-	"maxTiles":999,
-	"maxTime":60
+	"maxTiles":120,
+	"maxTime":30
+	},
+	{
+	"id":7,
+	"file":"level7.tmx",
+	"loadouts":[
+		{"id":0,"amount":3},
+		{"id":1,"amount":1},
+		{"id":2,"amount":2},
+		{"id":3,"amount":3}
+	],
+	"objectives":[
+		{"id":0,"type":0,"value":0,"paramId":0,"sequence":[]},
+		{"id":1,"type":1,"value":6,"paramId":0,"sequence":[]},
+		{"id":2,"type":6,"value":20,"paramId":0,"sequence":[]}
+	],
+	"maxTiles":50,
+	"maxTime":15
 	}
 ]
 }

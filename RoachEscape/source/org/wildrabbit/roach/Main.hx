@@ -85,6 +85,14 @@ class Main extends Sprite
 		Reg.currentLevel = Reg.currentWorld.levels[Reg.gameWorld.currentLevelIdx];
 		
 		Reg.gameWorld.load();
+		if (!Reg.worldDatabase.exists(Reg.gameWorld.currentWorldIdx) || Reg.gameWorld.currentLevelIdx < 0 || Reg.gameWorld.currentLevelIdx >= Reg.worldDatabase[Reg.gameWorld.currentWorldIdx].levels.length)
+		{
+			Reg.gameWorld.clearSave();
+			Reg.gameWorld.currentWorldIdx = 0;
+			Reg.gameWorld.currentLevelIdx = 0;
+		}
+		Reg.currentWorld = Reg.worldDatabase[Reg.gameWorld.currentWorldIdx];
+		Reg.currentLevel = Reg.currentWorld.levels[Reg.gameWorld.currentLevelIdx];
 
 		addChild(new FlxGame(gameWidth, gameHeight, initialState, zoom, framerate, framerate, skipSplash, startFullscreen));
 

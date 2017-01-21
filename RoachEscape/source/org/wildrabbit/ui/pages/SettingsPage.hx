@@ -37,7 +37,7 @@ class SettingsPage extends TabPage
 		
 		globalSoundMuteText = new FlxText(64, 32, 180, "SOUND ENABLED", 20);
 		globalSoundMuteText.color = FlxColor.WHITE;
-		globalSoundMuteText.font = AssetPaths.small_text__TTF;
+		globalSoundMuteText.font = AssetPaths.small_text__ttf;
 		add(globalSoundMuteText);
 		
 		globalSoundMuteTickBox = new FlxButton(32, 32, "", onToggleSound);

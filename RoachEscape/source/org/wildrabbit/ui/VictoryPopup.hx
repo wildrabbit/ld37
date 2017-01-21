@@ -124,7 +124,13 @@ class VictoryPopup extends FlxSpriteGroup
 			Reg.currentLevel = Reg.currentWorld.levels[Reg.gameWorld.currentLevelIdx];
 		}
 		
-		FlxTween.tween(scale, { x:0, y:0 }, 0.25, { ease:FlxEase.backIn, onComplete: function(t:FlxTween):Void 
+		if (newGoals.length > 0)
+			container.remove(newGoals[currentGoal]);
+		for (button in buttons)
+		{
+			container.remove(button);
+		}
+		FlxTween.tween(scale, { x:0, y:0 }, 0.5, { ease:FlxEase.backIn, onComplete: function(t:FlxTween):Void 
 			{ 
 				destroy(); 
 				FlxG.switchState(new PlayState()); 				
@@ -134,7 +140,13 @@ class VictoryPopup extends FlxSpriteGroup
 	
 	public function onEditClick():Void
 	{
-		FlxTween.tween(scale, { x:0, y:0 }, 0.15, { ease:FlxEase.backIn, onComplete: function(t:FlxTween):Void 
+		if (newGoals.length > 0)
+			container.remove(newGoals[currentGoal]);
+		for (button in buttons)
+		{
+			container.remove(button);
+		}
+		FlxTween.tween(scale, { x:0, y:0 }, 0.5, { ease:FlxEase.backIn, onComplete: function(t:FlxTween):Void 
 			{ 
 				destroy(); 
 				cast(FlxG.state, PlayState).setStageMode(StageMode.EDIT);
@@ -195,14 +207,21 @@ class VictoryPopup extends FlxSpriteGroup
 		buttons[BTN_EDIT].build(FlxRect.weak(0, 0, btnWidth, btnHeight), FlxColor.fromRGB(130, 0, 37), AssetPaths.build__png, onEditClick);
 		buttons[BTN_MENU].build(FlxRect.weak(0, 0, btnWidth, btnHeight), FlxColor.fromRGB(128, 128, 128), AssetPaths.menu__png, onMenuClick);		
 		
+		var hasGoals:Bool = newGoals.length > 0 && currentGoal == -1;
+		for (button in buttons)
+		{
+			button.visible = !hasGoals;
+			button.active = !hasGoals;
+		}
+		
 		init = true;
 		
-		if (newGoals.length > 0 && currentGoal == -1)
+		if (hasGoals)
 		{
 			currentGoal = 0;
 			container.add(newGoals[currentGoal]);
 			
-			goalTimer.start(0.2, onRevealGoal, 1);
+			goalTimer.start(0.5, onRevealGoal, 1);
 		}		
 	}
 	
@@ -211,11 +230,11 @@ class VictoryPopup extends FlxSpriteGroup
 		newGoals[currentGoal].setRevealed(true, true);
 		if (currentGoal != newGoals.length - 1)
 		{
-			goalTimer.start(0.5, onNextGoal, 1);
+			goalTimer.start(1, onNextGoal, 1);
 		}
 		else 
 		{
-			goalTimer.start(0.5, onLastGoal, 1);
+			goalTimer.start(1, onLastGoal, 1);
 		}
 	}
 	public function onNextGoal(timer:FlxTimer):Void
@@ -223,11 +242,16 @@ class VictoryPopup extends FlxSpriteGroup
 		container.remove(newGoals[currentGoal]);
 		currentGoal++;
 		container.add(newGoals[currentGoal]);
-		goalTimer.start(0.2, onRevealGoal, 1);
+		goalTimer.start(0.5, onRevealGoal, 1);
 	}
 	
 	public function onLastGoal(timer:FlxTimer):Void
 	{
 		container.remove(newGoals[currentGoal]);
+		for (button in buttons)
+		{
+			button.visible = true;
+			button.active = true;
+		}
 	}
 }
