@@ -55,23 +55,72 @@ class DefeatPopup extends FlxSpriteGroup
 		container.add(popupBg);
 		
 		popupDeco = new FlxSprite(128, 310, AssetPaths.popup_deco__png);
+		popupDeco.visible = false;
+		popupBg.stamp(popupDeco, Std.int(popupDeco.x - popupBg.x), Std.int(popupDeco.y - popupBg.y));
 		container.add(popupDeco);
 		
 		roachie = new FlxSprite(352, 310, AssetPaths.roachie_lose__png);
 		
 		title = new FlxText(128, 212, 512, TITLE_TEXT,48);				
 		title.alignment = FlxTextAlign.CENTER;
+		popupBg.stamp(title, Std.int(title.x - popupBg.x), Std.int(title.y - popupBg.y));
+		title.visible = false;
 		
 		buttons = new Array<ActionButton>();
+		
+		var btnStart:FlxPoint = new FlxPoint(230, 508);
+		var btnWidth:Float = 146;
+		var btnHeight = 56;
+		var btnSpace:Float = 16;
+		for (i in 0...NUM_BUTTONS)
+		{
+			var btn:ActionButton = new ActionButton(btnStart.x, btnStart.y);
+			buttons.push(btn);			
+			btnStart.x += (btnWidth + btnSpace);
+			container.add(buttons[buttons.length - 1]);
+		}
+		
+		buttons[BTN_EDIT].build(FlxRect.weak(0, 0, btnWidth, btnHeight), FlxColor.fromRGB(130, 0, 37), AssetPaths.build__png, onEditClick);
+		buttons[BTN_MENU].build(FlxRect.weak(0, 0, btnWidth, btnHeight), FlxColor.fromRGB(128, 128, 128), AssetPaths.menu__png, onMenuClick);
+		
+		for (button in buttons)
+		{
+			var test:FlxSprite = new FlxSprite(0, 0, button.pixels);
+			button.stampButton(popupBg, button.x - popupBg.x, button.y - popupBg.y);
+			button.active = false;
+			button.visible = false;
+		}
 	}
 	
 	public function onEditClick():Void
 	{
-		FlxTween.tween(scale, { x:0, y:0 }, 0.15, { ease:FlxEase.backIn, onComplete: function(t:FlxTween):Void 
+		closePopup();
+	}
+	
+	private function closePopup():Void
+	{
+		popupBg.stamp(title, Std.int(title.x - popupBg.x), Std.int(title.y - popupBg.y));
+		title.visible = false;
+		
+		popupBg.stamp(popupDeco, Std.int(popupDeco.x - popupBg.x), Std.int(popupDeco.y - popupBg.y));
+		popupDeco.visible = false;
+
+		popupBg.stamp(roachie, Std.int(roachie.x - popupBg.x), Std.int(roachie.y - popupBg.y));
+		roachie.visible = false;
+		popupBg.stamp(popupInfo, Std.int(popupInfo.x - popupBg.x), Std.int(popupInfo.y - popupBg.y));
+		popupInfo.visible = false;
+		
+		
+		for (button in buttons)		
+		{
+			button.stampButton(popupBg, button.x - popupBg.x, button.y - popupBg.y);
+			button.visible = false;
+		}
+		
+		FlxTween.tween(popupBg.scale, { x:0, y:0 }, 0.5, { ease:FlxEase.backIn, onComplete: function(t:FlxTween):Void 
 			{ 
 				destroy(); 
-				cast(FlxG.state, PlayState).setStageMode(StageMode.EDIT);
-				//FlxG.switchState(new PlayState()); 				
+				cast(FlxG.state, PlayState).setStageMode(StageMode.EDIT);				
 			}			
 		} );
 	}
@@ -100,20 +149,15 @@ class DefeatPopup extends FlxSpriteGroup
 		container.add(title);
 		container.add(roachie);
 		container.add(popupInfo);
-
-		var btnStart:FlxPoint = new FlxPoint(230, 508);
-		var btnWidth:Float = 146;
-		var btnHeight = 56;
-		var btnSpace:Float = 16;
-		for (i in 0...NUM_BUTTONS)
-		{
-			buttons.push(new ActionButton(btnStart.x, btnStart.y));			
-			btnStart.x += (btnWidth + btnSpace);
-			container.add(buttons[buttons.length - 1]);
-		}
 		
-		buttons[BTN_EDIT].build(FlxRect.weak(0, 0, btnWidth, btnHeight), FlxColor.fromRGB(130, 0, 37), AssetPaths.build__png, onEditClick);
-		buttons[BTN_MENU].build(FlxRect.weak(0, 0, btnWidth, btnHeight), FlxColor.fromRGB(128, 128, 128), AssetPaths.menu__png, onMenuClick);
+		popupBg.makeGraphic(512, 416, FlxColor.BLACK);
+		for (button in buttons)
+		{
+			button.active = true;
+			button.visible = true;
+		}
+		popupDeco.visible = true;
+		title.visible = true;
 	}
 	
 	public function getDefeatText(result:Result):String

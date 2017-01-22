@@ -2,10 +2,12 @@ package org.wildrabbit.ui;
 
 import flixel.FlxG;
 import flixel.FlxSprite;
+import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.group.FlxSpriteGroup;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
+import flixel.system.FlxAssets;
 import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
@@ -69,15 +71,41 @@ class VictoryPopup extends FlxSpriteGroup
 		
 		popupDeco = new FlxSprite(148, 310, AssetPaths.popup_deco__png);
 		container.add(popupDeco);
+		popupBg.stamp(popupDeco, Std.int(popupDeco.x - popupBg.x), Std.int(popupDeco.y - popupBg.y));
+		popupDeco.visible = false;
 		
 		title = new FlxText(266, 212, 278, TITLE_TEXT,48);				
 		title.alignment = FlxTextAlign.CENTER;
+		popupBg.stamp(title, Std.int(title.x - popupBg.x), Std.int(title.y - popupBg.y));
 		container.add(title);
+		title.visible = false;
 		
 
 		newGoals = new Array<GoalPanel>();
 		buttons = new Array<ActionButton>();
 		goalTimer = new FlxTimer();
+		
+		var btnStart:FlxPoint = new FlxPoint(174, 508);
+		var btnWidth:Float = 146;
+		var btnHeight = 56;
+		var btnSpace:Float = 8;
+		
+		var cols:Array<FlxColor> = [FlxColor.fromRGB(130, 0, 37), FlxColor.fromRGB(130, 0, 37), FlxColor.fromRGB(128, 128, 128)];
+		var gfx:Array<String> = [ AssetPaths.next__png,  AssetPaths.build__png, AssetPaths.menu__png];
+		var cbs:Array<Void->Void> = [ onNextClick,  onEditClick, onMenuClick];
+		for (i in 0...NUM_BUTTONS)
+		{
+			var button:ActionButton = new ActionButton(btnStart.x, btnStart.y);
+			buttons.push(button);			
+			btnStart.x += (btnWidth + btnSpace);
+			container.add(buttons[buttons.length - 1]);
+			
+			button.build(FlxRect.weak(0, 0, btnWidth, btnHeight), cols[i], gfx[i], cbs[i]);
+			
+			button.stampButton(popupBg, button.x - popupBg.x, button.y - popupBg.y);
+			button.active = false;
+			button.visible = false;
+		}
 	}
 	
 	override public function update(dt:Float):Void
@@ -124,33 +152,46 @@ class VictoryPopup extends FlxSpriteGroup
 			Reg.currentLevel = Reg.currentWorld.levels[Reg.gameWorld.currentLevelIdx];
 		}
 		
-		if (newGoals.length > 0)
-			container.remove(newGoals[currentGoal]);
-		for (button in buttons)
-		{
-			container.remove(button);
-		}
-		FlxTween.tween(scale, { x:0, y:0 }, 0.5, { ease:FlxEase.backIn, onComplete: function(t:FlxTween):Void 
-			{ 
-				destroy(); 
-				FlxG.switchState(new PlayState()); 				
-			}			
-		} );
+		closePopup(true);
 	}
 	
 	public function onEditClick():Void
 	{
-		if (newGoals.length > 0)
-			container.remove(newGoals[currentGoal]);
-		for (button in buttons)
+		closePopup(false);
+	}
+	
+	private function closePopup(switchState:Bool):Void
+	{
+		// Stamp shit again :/
+		popupBg.stamp(title, Std.int(title.x - popupBg.x), Std.int(title.y - popupBg.y));
+		title.visible = false;
+		
+		popupBg.stamp(popupDeco, Std.int(popupDeco.x - popupBg.x), Std.int(popupDeco.y - popupBg.y));
+		popupDeco.visible = false;
+		
+		for (button in buttons)		
 		{
-			container.remove(button);
+			button.stampButton(popupBg, button.x - popupBg.x, button.y - popupBg.y);
+			button.visible = false;
 		}
-		FlxTween.tween(scale, { x:0, y:0 }, 0.5, { ease:FlxEase.backIn, onComplete: function(t:FlxTween):Void 
+		
+		FlxTween.tween(popupBg.scale, { x:0, y:0 }, 0.5, { ease:FlxEase.backIn, onComplete: function(t:FlxTween):Void 
 			{ 
+				if (newGoals.length > 0)
+					container.remove(newGoals[currentGoal]);
+				for (button in buttons)
+				{
+					container.remove(button);
+				}
 				destroy(); 
-				cast(FlxG.state, PlayState).setStageMode(StageMode.EDIT);
-				//FlxG.switchState(new PlayState()); 				
+				if (switchState)
+				{
+					FlxG.switchState(new PlayState()); 					
+				}
+				else 
+				{
+					cast(FlxG.state, PlayState).setStageMode(StageMode.EDIT);	
+				}
 			}			
 		} );
 	}
@@ -192,25 +233,15 @@ class VictoryPopup extends FlxSpriteGroup
 		roachie.angularVelocity = 360;
 		container.add(roachie);
 		
-		var btnStart:FlxPoint = new FlxPoint(174, 508);
-		var btnWidth:Float = 146;
-		var btnHeight = 56;
-		var btnSpace:Float = 8;
-		for (i in 0...NUM_BUTTONS)
-		{
-			buttons.push(new ActionButton(btnStart.x, btnStart.y));			
-			btnStart.x += (btnWidth + btnSpace);
-			container.add(buttons[buttons.length - 1]);
-		}
 		
-		buttons[BTN_NEXT].build(FlxRect.weak(0, 0, btnWidth, btnHeight), FlxColor.fromRGB(130, 0, 37), AssetPaths.next__png, onNextClick);
-		buttons[BTN_EDIT].build(FlxRect.weak(0, 0, btnWidth, btnHeight), FlxColor.fromRGB(130, 0, 37), AssetPaths.build__png, onEditClick);
-		buttons[BTN_MENU].build(FlxRect.weak(0, 0, btnWidth, btnHeight), FlxColor.fromRGB(128, 128, 128), AssetPaths.menu__png, onMenuClick);		
+		popupBg.makeGraphic(512, 416, FlxColor.BLACK);
+		popupDeco.visible = true;
+		title.visible = true;
 		
 		var hasGoals:Bool = newGoals.length > 0 && currentGoal == -1;
 		for (button in buttons)
 		{
-			button.visible = !hasGoals;
+			button.visible = true;
 			button.active = !hasGoals;
 		}
 		
@@ -250,7 +281,6 @@ class VictoryPopup extends FlxSpriteGroup
 		container.remove(newGoals[currentGoal]);
 		for (button in buttons)
 		{
-			button.visible = true;
 			button.active = true;
 		}
 	}

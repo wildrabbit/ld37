@@ -48,4 +48,10 @@ class ActionButton extends FlxSpriteGroup
 			callback();
 		}
 	}
+	
+	public function stampButton(source:FlxSprite, srcX:Float, srcY:Float):Void
+	{
+		source.stamp(button, Std.int(srcX + button.x - x), Std.int(srcY + button.y - y));
+		source.stamp(icon, Std.int(srcX + icon.x - x), Std.int(srcY + icon.y - y));
+	}
 }
