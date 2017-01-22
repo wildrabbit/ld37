@@ -323,6 +323,7 @@ class MapData extends TiledMap
 	
 	public function getTileAt(coords:FlxPoint):TileData
 	{
+		if (!validCoords(coords)) return null;
 		return tiles[asIndex(coords)];
 	}
 	public function hitsEdgeAt(oldCoords:FlxPoint, coords:FlxPoint):Bool
@@ -331,6 +332,11 @@ class MapData extends TiledMap
 		var deltaY:Int = Std.int(coords.y - oldCoords.y);
 		var oldTile:TileData = tiles[asIndex(oldCoords)];
 		var newTile:TileData = tiles[asIndex(coords)];
+		
+		if (deltaX == 0 && deltaY == 0)
+		{
+			
+		}
 		return deltaX < 0 && ((oldTile.edgeMask & MASK_LEFT) != 0 || (newTile.edgeMask & MASK_RIGHT)!= 0)
 			|| deltaX > 0 && ((oldTile.edgeMask & MASK_RIGHT)!= 0 || (newTile.edgeMask & MASK_LEFT)!= 0)
 			|| deltaY < 0 && ((oldTile.edgeMask & MASK_UP)!= 0 || (newTile.edgeMask & MASK_DOWN)!= 0)

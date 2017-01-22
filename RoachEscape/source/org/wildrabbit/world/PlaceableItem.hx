@@ -103,8 +103,7 @@ class PlaceableItem extends Actor
 				{
 					facingSound.play();
 				}
-				//myCoords.put();
-				//midCoords.put();
+				//parent.removeEntity(this);				
 			}
 		}
 	}

@@ -848,4 +848,13 @@ class PlayState extends FlxState
 		add(lvTxt);
 	}
 #end
+
+	public function removeEntity(item:PlaceableItem):Void
+	{
+		gameContainer.removePlaceableItem(item);
+		actors.remove(item);
+		// TODO: Item destruction anim.
+		item.destroy();
+		
+	}
 }

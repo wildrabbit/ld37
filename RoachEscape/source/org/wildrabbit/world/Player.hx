@@ -105,9 +105,8 @@ class Player extends Actor
 			if (!parent.levelData.validCoords(coordsTL) || !parent.levelData.validCoords(coordsTR)  || !parent.levelData.validCoords(coordsBL) || !parent.levelData.validCoords(coordsBR) )
 			{
 				setRelativePos(oldPos.x, oldPos.y);
-				velocity.set();
 			}
-			else 
+			//else 
 			{
 				var goalCoords:FlxPoint = parent.levelData.getTilePositionFromWorld(Math.round(parent.goal.relX), Math.round(parent.goal.relY));
 				var midPos:FlxPoint = getMidpoint();
