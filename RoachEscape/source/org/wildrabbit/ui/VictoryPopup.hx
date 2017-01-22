@@ -65,16 +65,16 @@ class VictoryPopup extends FlxSpriteGroup
 		container = new FlxSpriteGroup();
 		add(container);
 		
-		popupBg = new FlxSprite(148, 176);
+		popupBg = new FlxSprite(128, 176);
 		popupBg.makeGraphic(512, 416, FlxColor.BLACK);
 		container.add(popupBg);		
 		
-		popupDeco = new FlxSprite(148, 310, AssetPaths.popup_deco__png);
+		popupDeco = new FlxSprite(128, 310, AssetPaths.popup_deco__png);
 		container.add(popupDeco);
 		popupBg.stamp(popupDeco, Std.int(popupDeco.x - popupBg.x), Std.int(popupDeco.y - popupBg.y));
 		popupDeco.visible = false;
 		
-		title = new FlxText(266, 212, 278, TITLE_TEXT,48);				
+		title = new FlxText(128, 212, 512, TITLE_TEXT,48);				
 		title.alignment = FlxTextAlign.CENTER;
 		popupBg.stamp(title, Std.int(title.x - popupBg.x), Std.int(title.y - popupBg.y));
 		container.add(title);
@@ -85,7 +85,7 @@ class VictoryPopup extends FlxSpriteGroup
 		buttons = new Array<ActionButton>();
 		goalTimer = new FlxTimer();
 		
-		var btnStart:FlxPoint = new FlxPoint(174, 508);
+		var btnStart:FlxPoint = new FlxPoint(154, 508);
 		var btnWidth:Float = 146;
 		var btnHeight = 56;
 		var btnSpace:Float = 8;
@@ -112,7 +112,7 @@ class VictoryPopup extends FlxSpriteGroup
 	{
 		super.update(dt);
 		if (!init) return;
-		if (roachie.x > 596)
+		if (roachie.x > 576)
 		{
 			container.remove(roachie);
 			roachie.moves = false;
@@ -227,7 +227,7 @@ class VictoryPopup extends FlxSpriteGroup
 	public function onIntroAnimFinished(t:FlxTween):Void
 	{
 		
-		roachie = new FlxSprite(148, 310, AssetPaths.roachie_win__png);
+		roachie = new FlxSprite(128, 310, AssetPaths.roachie_win__png);
 		roachie.moves = true;
 		roachie.velocity.set(256,0);
 		roachie.angularVelocity = 360;
