@@ -15,6 +15,7 @@ import flixel.group.FlxGroup;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.input.FlxPointer;
 import flixel.math.FlxPoint;
+import flixel.math.FlxRect;
 import flixel.system.FlxSound;
 import flixel.text.FlxText;
 import flixel.tile.FlxTilemap;
@@ -149,7 +150,11 @@ class PlayState extends FlxState
 
 		levelData = new MapData("assets/data/"+Reg.currentLevel.file);
 		levelData.build(this);
+		var rect:FlxRect = FlxRect.get();
+		levelData.getEffectiveAreaRect(rect);
 		
+		rect.put();
+
 		if (!Reg.gameWorld.worldTable.exists(Reg.gameWorld.currentWorldIdx))
 		{
 			Reg.gameWorld.worldTable[Reg.gameWorld.currentWorldIdx] = new WorldStateEntry();

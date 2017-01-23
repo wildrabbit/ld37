@@ -5,6 +5,7 @@ import flixel.FlxObject;
 import flixel.FlxState;
 import flixel.addons.tile.FlxTilemapExt;
 import flixel.math.FlxPoint;
+import flixel.math.FlxRect;
 import haxe.ds.Vector;
 import haxe.io.Path;
 import org.wildrabbit.roach.states.PlayState;
@@ -346,5 +347,38 @@ class MapData extends TiledMap
 	public function asIndex(coords:FlxPoint):Int
 	{
 		return Std.int(coords.x + coords.y * width);
+	}
+	
+	public function getEffectiveAreaRect(r:FlxRect):Void
+	{
+		var minRow:Int = 100;
+		var minCol:Int = 100;
+		var maxRow:Int = -1;
+		var maxCol:Int = -1;
+
+		var testPoint:FlxPoint = FlxPoint.get();
+		for (row in 0...height)
+		{
+			var empty:Bool = true;
+			for (col in 0...width)
+			{
+				testPoint.set(col, row);
+				if (getTileAt(testPoint).type != TileType.EMPTY)
+				{
+					empty = false;
+					minCol = cast Math.min(minCol, col);
+					maxCol = cast Math.max(maxCol, col);
+				}
+			}
+			
+			if (!empty)
+			{
+				minRow = cast Math.min(minRow, row);
+				maxRow = cast Math.max(maxRow, row);
+			}
+		}
+		
+		r.set(minCol, minRow, (maxCol - minCol + 1), (maxRow - minRow + 1));
+		testPoint.put();
 	}
 }
