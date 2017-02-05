@@ -68,8 +68,10 @@ class MenuState extends FlxState
 			}
 			if (FlxG.keys.justPressed.ANY|| FlxG.mouse.justPressed)
 			{
-				FlxG.sound.play(AssetPaths.play__wav);
-				FlxG.switchState(new HowtoState());
+				FlxG.sound.play(AssetPaths.ui_select__wav, 1, false, null, true, function():Void
+					{
+						FlxG.switchState(new HowtoState());
+					});				
 			}
 			
 		}

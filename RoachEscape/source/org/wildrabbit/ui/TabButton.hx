@@ -1,5 +1,6 @@
 package org.wildrabbit.ui;
 
+import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxAtlasFrames;
@@ -52,6 +53,7 @@ class TabButton extends FlxSpriteGroup
 	function tabButtonClicked():Void
 	{
 		trace("Clicked button " + pageIdx);
+		FlxG.sound.play(AssetPaths.ui_tab_tap__wav);
 		parent.setPage(pageIdx);
 	}	
 	

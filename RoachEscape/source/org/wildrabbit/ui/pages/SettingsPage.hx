@@ -59,11 +59,13 @@ class SettingsPage extends TabPage
 	
 	public function onResetSaveButton():Void
 	{
+		FlxG.sound.play(AssetPaths.ui_select__wav);
 		parent.resetSave();
 	}
 	
 	public function onToggleSound():Void
 	{
+		FlxG.sound.play(AssetPaths.ui_checkbox__wav);
 		FlxG.sound.muted = !FlxG.sound.muted;
 		globalSoundMuteTick.visible = !FlxG.sound.muted;
 	}

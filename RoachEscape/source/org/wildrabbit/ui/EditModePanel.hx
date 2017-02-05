@@ -132,6 +132,7 @@ class EditModePanel extends FlxTypedSpriteGroup<FlxSprite>
 		playButton = initButton(config.playRect, onPlayButton, config.buttonColour, AssetPaths.play__png);
 		clearButton = initButton(config.clearRect, onClearButton, config.buttonColour, AssetPaths.clear__png);
 		menuButton = initButton( config.menuRect, onMenuButton, FlxColor.GRAY, AssetPaths.menu__png);
+		menuButton.active = false;
 		
 		tilesPage = new TilesPage(parent, config);
 		goalsPage = new GoalsPage(parent);
@@ -162,7 +163,6 @@ class EditModePanel extends FlxTypedSpriteGroup<FlxSprite>
 	public function onClearButton(): Void 
 	{
 		parent.resetPressed();
-		FlxG.sound.play(AssetPaths.select__wav);
 	}
 	
 	public function onMenuButton(): Void 
@@ -179,6 +179,7 @@ class EditModePanel extends FlxTypedSpriteGroup<FlxSprite>
 		
 		tabWidget.setPage(PAGE_TILES);
 		tabWidget.refreshVisibility();
+		menuButton.active = false;
 	}
 	
 	public function goToPlay():Void

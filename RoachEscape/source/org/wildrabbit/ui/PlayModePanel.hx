@@ -157,19 +157,16 @@ class PlayModePanel extends FlxTypedSpriteGroup<FlxSprite>
 	public function onPauseToggle():Void 
 	{
 		parent.togglePause();
-		FlxG.sound.play(AssetPaths.select__wav);
 	}
 	
 	public function onFastForward():Void
 	{
 		parent.onFastForward();
-		FlxG.sound.play(AssetPaths.select__wav);
 	}
 	
 	public function onEdit(): Void 
 	{
 		parent.setStageMode(StageMode.EDIT);
-		FlxG.sound.play(AssetPaths.select__wav);
 	}
 	
 	public function onPlay():Void
@@ -181,7 +178,6 @@ class PlayModePanel extends FlxTypedSpriteGroup<FlxSprite>
 	
 	public function onMenu():Void
 	{
-		FlxG.sound.play(AssetPaths.select__wav);
 	}
 	
 	public function onNextLevel():Void

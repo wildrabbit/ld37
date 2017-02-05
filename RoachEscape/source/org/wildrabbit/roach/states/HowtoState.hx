@@ -385,7 +385,9 @@ class HowtoState extends FlxState
 	
 	private function finishHowto(?t:FlxTimer):Void
 	{
-		FlxG.sound.play(AssetPaths.play__wav);
-		FlxG.switchState(new PlayState());
+		FlxG.sound.play(AssetPaths.ui_select__wav, 1, false, null, true, function():Void
+		{
+			FlxG.switchState(new PlayState());
+		});			
 	}
 }

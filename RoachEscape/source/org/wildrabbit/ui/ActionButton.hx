@@ -1,11 +1,13 @@
 package org.wildrabbit.ui;
 
+import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup;
 import flixel.math.FlxRect;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 import flixel.system.FlxAssets.FlxGraphicAsset;
+import org.wildrabbit.roach.AssetPaths;
 
 /**
  * ...
@@ -43,6 +45,7 @@ class ActionButton extends FlxSpriteGroup
 	
 	private function onClick():Void
 	{
+		FlxG.sound.play(AssetPaths.ui_select__wav);
 		if (callback != null)
 		{
 			callback();

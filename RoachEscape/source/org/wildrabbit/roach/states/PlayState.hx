@@ -330,9 +330,7 @@ class PlayState extends FlxState
 									}
 								}
 							}
-							gameContainer.removePlaceableItem(entity);
-							actors.remove(entity);
-							entity.destroy();							
+							removeEntity(entity);
 						}
 						
 						if (willReplace)
@@ -420,6 +418,7 @@ class PlayState extends FlxState
 		hud.editPanel.updateToolPage(selectedToolIdx, currentTools[selectedToolIdx].amount);
 		gameContainer.addToPlaceableLayer(item);
 		actors.push(item);
+		FlxG.sound.play(AssetPaths.ui_placeTile__wav);
 	}
 	
 	public function toggleTool(i:Int):Void
@@ -431,13 +430,15 @@ class PlayState extends FlxState
 			
 			if (selectedToolIdx == i || tool.amount == 0)
 			{
+				FlxG.sound.play(tool.amount == 0 && selectedToolIdx != i? AssetPaths.ui_invalid_select__wav : AssetPaths.ui_tile_deselect__wav);
 				selectedToolIdx = -1;
 				hud.editPanel.deselectTool();
 			}
 			else 
 			{
 				selectedToolIdx = i;				
-				hud.editPanel.selectTool(selectedToolIdx);								
+				hud.editPanel.selectTool(selectedToolIdx);
+				FlxG.sound.play(AssetPaths.ui_tile_select__wav);
 			}						
 		}
 		else 
@@ -552,6 +553,7 @@ class PlayState extends FlxState
 	{
 		if (stageMode == StageMode.PAUSE && newMode != StageMode.PAUSE)
 		{
+			FlxG.sound.play(AssetPaths.unpause__wav);
 			pauseLayer.setPaused(false);
 			remove(pauseLayer);
 		}
@@ -599,7 +601,7 @@ class PlayState extends FlxState
 				hud.editPanel.deselectTool();
 				for (a in actors) { a.pause(true); }
 				gameContainer.removeFromSpriteLayer(playerTrail, GameContainer.SPRITE_PLAYER_BG_IDX);
-				
+				FlxG.sound.play(AssetPaths.pause__wav);
 				pauseLayer.setPaused(true);
 				add(pauseLayer);
 			}
@@ -856,6 +858,7 @@ class PlayState extends FlxState
 
 	public function removeEntity(item:PlaceableItem):Void
 	{
+		FlxG.sound.play(AssetPaths.ui_removeTile__wav);
 		gameContainer.removePlaceableItem(item);
 		actors.remove(item);
 		// TODO: Item destruction anim.

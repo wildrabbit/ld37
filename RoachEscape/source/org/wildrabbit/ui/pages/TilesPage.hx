@@ -52,7 +52,6 @@ class TilesPage extends TabPage
 	public function onToolClickBtn(i:Int):Void 
 	{
 		parent.toggleTool(i);
-		FlxG.sound.play(AssetPaths.select__wav);
 	}
 	
 	public function buildToolButtons(btnInfo:Array<PlaceableItemTool>, library:Map<Int,PlaceableItemData>):Void
