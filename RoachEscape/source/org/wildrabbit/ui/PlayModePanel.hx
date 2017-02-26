@@ -172,7 +172,7 @@ class PlayModePanel extends FlxTypedSpriteGroup<FlxSprite>
 	public function onPlay():Void
 	{
 		parent.playPressed();
-		FlxG.sound.play(AssetPaths.play__wav);
+		//FlxG.sound.play(AssetPaths.play__wav);
 		statsPage.resetScale();
 	}
 	

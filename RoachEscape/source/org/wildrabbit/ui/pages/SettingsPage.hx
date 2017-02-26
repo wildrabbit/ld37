@@ -65,8 +65,16 @@ class SettingsPage extends TabPage
 	
 	public function onToggleSound():Void
 	{
-		FlxG.sound.play(AssetPaths.ui_checkbox__wav);
-		FlxG.sound.muted = !FlxG.sound.muted;
+		if (!FlxG.sound.muted)
+			FlxG.sound.play(AssetPaths.ui_checkbox__wav);
+		
+			FlxG.sound.muted = !FlxG.sound.muted;
+		
+		if (!FlxG.sound.muted)
+		{			
+			FlxG.sound.play(AssetPaths.ui_checkbox__wav);
+			parent.onSoundUnmuted();
+		}
 		globalSoundMuteTick.visible = !FlxG.sound.muted;
 	}
 	

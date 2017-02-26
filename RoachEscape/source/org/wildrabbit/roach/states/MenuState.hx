@@ -32,6 +32,10 @@ class MenuState extends FlxState
 		add(cover);
 		version = new FlxText(0, 742, 400, "LD37 Post-compo - Ithildin", 24);
 		add(version);
+		if (!FlxG.sound.muted)
+		{
+			FlxG.sound.playMusic(AssetPaths.music_intro__wav);
+		}
 	}
 
 	/**

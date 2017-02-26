@@ -138,6 +138,7 @@ class PlayState extends FlxState
 		
 		actors = new Array<Actor>();
 		
+		FlxG.sound.playMusic(AssetPaths.music_edit__wav, 0.8);
 		stageMode = StageMode.EDIT;
 		timeToAwake = -1;
 		
@@ -562,6 +563,10 @@ class PlayState extends FlxState
 		{
 			case StageMode.EDIT:
 			{
+				if (stageMode != StageMode.EDIT)
+				{
+					FlxG.sound.playMusic(AssetPaths.music_edit__wav, 0.8);
+				}
 				destroySubStates = true;
 				var t:Transition = new Transition(new TransitionData(TransitionType.FADE, FlxColor.BLACK, 0.8));
 				t.start(TransitionStatus.OUT);
@@ -576,6 +581,11 @@ class PlayState extends FlxState
 			}
 			case StageMode.PLAY:
 			{
+				if (FlxG.sound.music.playing)
+				{
+					FlxG.sound.music.stop();
+				}
+					FlxG.sound.playMusic(AssetPaths.music_play__wav, 0.8);
 				selectedToolIdx = -1;
 				hud.editPanel.deselectTool();
 				if (stageMode != PAUSE)
@@ -864,5 +874,25 @@ class PlayState extends FlxState
 		// TODO: Item destruction anim.
 		item.destroy();
 		
+	}
+	
+	public function onSoundUnmuted():Void
+	{
+		var musicName:String = "";
+		var volume:Float = 1;
+		if (stageMode == StageMode.EDIT)
+		{
+			musicName = AssetPaths.music_edit__wav;
+			volume = 0.8;
+		}
+		else if (stageMode == StageMode.PLAY)
+		{
+			musicName = AssetPaths.music_play__wav;
+		}
+		
+		if (musicName != "")
+		{
+			FlxG.sound.playMusic(musicName, volume);
+		}
 	}
 }

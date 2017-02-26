@@ -157,7 +157,7 @@ class EditModePanel extends FlxTypedSpriteGroup<FlxSprite>
 	public function onPlayButton():Void
 	{
 		parent.playPressed();
-		FlxG.sound.play(AssetPaths.play__wav);
+		FlxG.sound.play(AssetPaths.begin_play__wav);
 	}
 	
 	public function onClearButton(): Void 
