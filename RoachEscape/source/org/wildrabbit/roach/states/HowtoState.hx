@@ -28,7 +28,7 @@ class HowtoState extends FlxState
 	private static inline var TEXT_6:String = "...and right!";
 	private static inline var TEXT_7:String = "Getting close now\n:)";
 	private static inline var TEXT_8:String = "Whoa!";
-	private static inline var TEXT_9:String = "Not that way";
+	private static inline var TEXT_9:String = "Nononono!";
 	private static inline var TEXT_10:String = ":(";
 	private static inline var TEXT_11:String = "Guess I'm going to need your help";
 	
@@ -238,6 +238,7 @@ class HowtoState extends FlxState
 	
 	private function startStage8(t:FlxTimer):Void
 	{
+		text.setPosition(522, 424);
 		text.text = TEXT_9; 
 		
 		seqTimer.start(1, startStage9);
@@ -332,6 +333,7 @@ class HowtoState extends FlxState
 	private function startStage18(t:FlxTween):Void
 	{
 		text.text = TEXT_19;
+		text.setPosition(730, 220);
 		roachie.facing = FlxObject.DOWN;
 		roachie.animation.play("vertical");
 		tween = FlxTween.tween(roachie, { x:640, y:484}, 1.0, { onComplete:startStage19 } );
@@ -369,7 +371,7 @@ class HowtoState extends FlxState
 	
 	private function startStage22(t:FlxTween):Void
 	{
-		text.setPosition(120, 518); 
+		text.setPosition(62, 364); 
 		text.alignment = FlxTextAlign.RIGHT; 
 		text.text = TEXT_22; 
 		

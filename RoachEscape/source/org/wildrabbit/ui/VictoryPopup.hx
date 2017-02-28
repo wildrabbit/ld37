@@ -1,5 +1,6 @@
 package org.wildrabbit.ui;
 
+import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.graphics.FlxGraphic;
@@ -283,5 +284,11 @@ class VictoryPopup extends FlxSpriteGroup
 		{
 			button.active = true;
 		}
+	}
+	
+	public function updateCamera(newCam:FlxCamera):Void
+	{
+		this.camera = newCam;
+		forEach(function(child:FlxSprite):Void { child.camera = newCam; }, true );
 	}
 }

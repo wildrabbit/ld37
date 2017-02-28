@@ -1,5 +1,6 @@
 package org.wildrabbit.ui;
 
+import flixel.FlxCamera;
 import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup;
 import flixel.tweens.FlxEase;
@@ -42,5 +43,12 @@ class PauseLayer extends FlxSpriteGroup
 			pauseTween.cancel();
 			pauseTween = null;
 		}
+	}
+	
+	public function updateCamera(newCam:FlxCamera):Void
+	{
+		this.camera = newCam;
+		bg.camera = newCam;
+		pauseGfx.camera = newCam;
 	}
 }

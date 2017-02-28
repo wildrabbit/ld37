@@ -1,6 +1,7 @@
 package org.wildrabbit.world;
 
 import flixel.FlxBasic;
+import flixel.FlxCamera;
 import flixel.FlxSprite;
 import flixel.addons.tile.FlxTilemapExt;
 import flixel.animation.FlxBaseAnimation;
@@ -45,6 +46,18 @@ class GameContainer extends FlxGroup
 		this.x = x;
 		this.y = y;
 		createLayers();
+	}
+	
+	public function setCameras(newCameras:Array<FlxCamera>):Void
+	{
+		mapBGLayer.cameras = newCameras;
+		edgeLayer.cameras = newCameras;
+		
+		placedItemsLayer.cameras = newCameras;
+		actorsLayer.cameras = newCameras;
+		playerBGSpriteLayer.cameras = newCameras;
+		playerLayer.cameras = newCameras;
+		playerFGSpriteLayer.cameras = newCameras;
 	}
 	
 	public function getPosition():FlxPoint
@@ -123,10 +136,12 @@ class GameContainer extends FlxGroup
 		map.setPosition(x + baseX, y + baseY);
 		if (layerID == BACKGROUND_IDX)
 		{
+			map.cameras = mapBGLayer.cameras;
 			mapBGLayer.add(map);
 		}
 		else if (layerID == EDGES_IDX)
 		{
+			map.cameras = edgeLayer.cameras;
 			edgeLayer.add(map);
 		}
 	}

@@ -8,6 +8,7 @@ import flixel.tweens.FlxTween;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
+import haxe.Timer;
 
 /**
  * A FlxState which can be used for the game's menu.
@@ -32,9 +33,10 @@ class MenuState extends FlxState
 		add(cover);
 		version = new FlxText(0, 742, 400, "LD37 Post-compo - Ithildin", 24);
 		add(version);
+		
 		if (!FlxG.sound.muted)
 		{
-			FlxG.sound.playMusic(AssetPaths.music_intro__wav);
+			Timer.delay(function ():Void { FlxG.sound.playMusic(AssetPaths.music_intro__wav); }, 30);			
 		}
 	}
 

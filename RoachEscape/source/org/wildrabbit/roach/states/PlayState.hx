@@ -1,5 +1,6 @@
 package org.wildrabbit.roach.states;
 
+import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxState;
@@ -14,6 +15,7 @@ import flixel.addons.transition.TransitionData;
 import flixel.group.FlxGroup;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.input.FlxPointer;
+import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.system.FlxSound;
@@ -122,6 +124,11 @@ class PlayState extends FlxState
 	
 	private var playerTrail:FlxTrail;
 	
+	public var gameCamera:FlxCamera;
+	public var gameCameras:Array<FlxCamera> = null;
+	
+	public var hudCamera:FlxCamera;
+	
 	/**
 	 * Function that is called up when to state is created to set it up.
 	 */
@@ -129,12 +136,26 @@ class PlayState extends FlxState
 	{
 		super.create();
 		
+		FlxCamera.defaultCameras = FlxG.cameras.list.copy();
+		gameCamera = new FlxCamera(X_OFFSET, Y_OFFSET, 640, 640);
+		gameCamera.bgColor = FlxColor.TRANSPARENT;
+		gameCamera.scroll.set(0, 0);
+		gameCameras = new Array<FlxCamera>();
+		gameCameras.push(gameCamera);
+		FlxG.cameras.add(gameCamera);
+		
+		hudCamera = new FlxCamera();
+		hudCamera.bgColor = FlxColor.TRANSPARENT;
+		FlxG.cameras.add(hudCamera);
+		FlxCamera.defaultCameras.concat([hudCamera]);
+		
 		currentTools = new Array<PlaceableItemTool>();
 		
 		buildItemLibrary();
 		
-		gameContainer = new GameContainer(X_OFFSET, Y_OFFSET);
+		gameContainer = new GameContainer(0, 0);
 		add(gameContainer);
+		gameContainer.setCameras(gameCameras);
 		
 		actors = new Array<Actor>();
 		
@@ -153,6 +174,26 @@ class PlayState extends FlxState
 		levelData.build(this);
 		var rect:FlxRect = FlxRect.get();
 		levelData.getEffectiveAreaRect(rect);
+		
+		var bg:FlxSprite = new FlxSprite(X_OFFSET, Y_OFFSET);
+		bg.makeGraphic(levelData.fullWidth, levelData.fullHeight, FlxColor.fromRGB(0x03, 0x2D, 0x45));
+		insert(0, bg);
+		
+		var xOffset:Float = 0;
+		var yOffset:Float = 0;
+		var midGridX:Float = levelData.fullWidth * 0.5;
+		var midGridY:Float = levelData.fullHeight * 0.5;
+
+		var halfRectWidth:Float = rect.width * 0.5;
+		var midX:Float = rect.x +  halfRectWidth;
+		xOffset = midX * levelData.tileWidth - levelData.fullWidth * 0.5;
+		
+		var halfRectHeight:Float = rect.height * 0.5;
+		var midY:Float = rect.y + halfRectHeight;
+		yOffset = midY * levelData.tileHeight - levelData.fullHeight * 0.5;
+
+		gameCamera.setSize(levelData.fullWidth, levelData.fullHeight);
+		gameCamera.scroll.set(xOffset, yOffset);
 		
 		rect.put();
 
@@ -182,11 +223,13 @@ class PlayState extends FlxState
 		
 		
 		hud = new HUD(this);
+		hud.camera = hudCamera;
 		hud.editPanel.buildTools(currentTools, toolLibrary);
 		hud.onStageModeChanged(stageMode);
 		add(hud);
 		
-		pauseLayer = new PauseLayer();	
+		pauseLayer = new PauseLayer();
+		pauseLayer.updateCamera(hudCamera);
 		
 #if debug		
 		createDebugItems();
@@ -228,9 +271,10 @@ class PlayState extends FlxState
 		if (baseBackgroundLayer != null)
 		{
 			gameContainer.removeMapLayer(baseBackgroundLayer, GameContainer.BACKGROUND_IDX);
+			baseBackgroundLayer.cameras = null;
 		}
 		baseBackgroundLayer = layer;
-		gameContainer.addToMapLayer(0,0,baseBackgroundLayer, GameContainer.BACKGROUND_IDX);
+		gameContainer.addToMapLayer(0, 0, baseBackgroundLayer, GameContainer.BACKGROUND_IDX);		
 	}
 
 	/**
@@ -287,7 +331,7 @@ class PlayState extends FlxState
 		
 		super.update(dt);
 		
-		var pos:FlxPoint = FlxG.mouse.getWorldPosition();			
+		var pos:FlxPoint = FlxG.mouse.getWorldPosition(gameCamera);			
 		var fits:Bool = pos.x >= baseBackgroundLayer.x && pos.x < baseBackgroundLayer.x + baseBackgroundLayer.width && pos.y >= baseBackgroundLayer.y && pos.y < baseBackgroundLayer.y + baseBackgroundLayer.height;
 		var mouseReleased:Bool = FlxG.mouse.justReleased;
 		if (stageMode == StageMode.EDIT)
@@ -411,6 +455,7 @@ class PlayState extends FlxState
 	private function createNewPlaceableItem(toolData:PlaceableItemData, coords:FlxPoint):Void
 	{
 		var item:PlaceableItem = new PlaceableItem();
+		item.cameras = [gameCamera];
 		item.init(this, toolData);
 		var newCoords:FlxPoint = levelData.getWorldPositionFromTileCoords(coords);
 		item.setRelativePos(newCoords.x, newCoords.y);
@@ -555,6 +600,7 @@ class PlayState extends FlxState
 		if (stageMode == StageMode.PAUSE && newMode != StageMode.PAUSE)
 		{
 			FlxG.sound.play(AssetPaths.unpause__wav);
+
 			pauseLayer.setPaused(false);
 			remove(pauseLayer);
 		}
@@ -581,11 +627,18 @@ class PlayState extends FlxState
 			}
 			case StageMode.PLAY:
 			{
-				if (FlxG.sound.music.playing)
+				if (stageMode == StageMode.PAUSE && !FlxG.sound.muted)
 				{
-					FlxG.sound.music.stop();
+					FlxG.sound.music.play();
 				}
-					FlxG.sound.playMusic(AssetPaths.music_play__wav, 0.8);
+				else 
+				{
+					if (FlxG.sound.music.playing)
+					{
+						FlxG.sound.music.stop();
+					}
+					FlxG.sound.playMusic(AssetPaths.music_play__wav, 0.8);					
+				}
 				selectedToolIdx = -1;
 				hud.editPanel.deselectTool();
 				if (stageMode != PAUSE)
@@ -606,6 +659,10 @@ class PlayState extends FlxState
 			}
 			case StageMode.PAUSE:
 			{
+				if (FlxG.sound.music.playing)
+				{
+					FlxG.sound.music.pause();
+				}
 				resetTimescale(true);
 				selectedToolIdx = -1;
 				hud.editPanel.deselectTool();
@@ -614,6 +671,7 @@ class PlayState extends FlxState
 				FlxG.sound.play(AssetPaths.pause__wav);
 				pauseLayer.setPaused(true);
 				add(pauseLayer);
+				pauseLayer.updateCamera(hudCamera);
 			}
 			case StageMode.OVER:
 			{
@@ -720,13 +778,15 @@ class PlayState extends FlxState
 					//Victory popup
 					var popup:VictoryPopup = new VictoryPopup();
 					add(popup);	
+					popup.updateCamera(hudCamera);
 					popup.start(victoryPopupInfo);
 				}
 				else
 				{
 					//Defeat popup
-					var popup:DefeatPopup= new DefeatPopup();
+					var popup:DefeatPopup = new DefeatPopup();
 					add(popup);
+					popup.updateCamera(hudCamera);
 					popup.start(result);
 				}	
 				Reg.gameWorld.save();

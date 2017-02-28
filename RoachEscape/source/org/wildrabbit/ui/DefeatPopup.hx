@@ -1,5 +1,6 @@
 package org.wildrabbit.ui;
 
+import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup;
@@ -171,5 +172,11 @@ class DefeatPopup extends FlxSpriteGroup
 			return "What took you so long?";
 		}
 		else return "";
+	}
+	
+	public function updateCamera(newCam:FlxCamera):Void
+	{
+		this.camera = newCam;
+		forEach(function(child:FlxSprite):Void { child.camera = newCam; }, true );
 	}
 } 
